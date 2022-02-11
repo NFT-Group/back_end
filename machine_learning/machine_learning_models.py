@@ -2,6 +2,7 @@ import numpy as np
 from numpy import genfromtxt
 from numpy import arange
 
+import pathlib
 import pandas as pd
 from pandas import read_csv
 import matplotlib.pyplot as plt 
@@ -24,10 +25,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.datasets import make_regression
 from sklearn.metrics import mean_squared_error
 
-from traitFormat import trait_format
-from rarity import sim
-from rarity import individual_rar
-from rarity import list_rar
+from trait_format import trait_format
 from datetime import datetime
 import csv
 import sys
@@ -310,14 +308,15 @@ boredApeKennelAddress = '0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623'
 pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
 
 
+
 collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodlesAddress,
         "coolCatsAddress": coolCatsAddress,
         "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
         "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
 
 for value in collection_addresses_dict.values():
-        transactions_link = '/home/apb121/historical_data/past_' + value + '.csv'
-        unique_nfts_link = '/home/apb121/metadata/all_' + value + '.csv'
+        transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
+        unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/transactions/all_' + value + '.csv'
         print(transactions_link)
         print(unique_nfts_link)
         create_data(transactions_link, unique_nfts_link, value)

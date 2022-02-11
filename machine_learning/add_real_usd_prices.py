@@ -7,10 +7,9 @@ from matplotlib import pyplot
 import sklearn
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from traitFormat import trait_format
-from rarity import sim
-from rarity import individual_rar
-from rarity import list_rar
+from trait_format import trait_format
+import pathlib
+
 from datetime import datetime
 import csv
 import sys
@@ -41,7 +40,8 @@ def add_real_usd_prices(data):
     eth_price = np.asarray(eth_price)
 
     # open historical eth-usd csv file for lookup
-    eth_usd_csv = genfromtxt('/home/tm21/ML/regression/ETH-USD_1_.csv', delimiter=",", encoding="utf-8", dtype=None)
+    address = str(pathlib.Path(__file__).parent.resolve()) + '/data/eth_usd.csv'
+    eth_usd_csv = genfromtxt(address, delimiter=",", encoding="utf-8", dtype=None)
 
 
     date_eth_price = []
