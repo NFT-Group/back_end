@@ -1,3 +1,5 @@
+## NOPE this is a flask app now. all hail flask
+
 # Python: Getting Started
 
 A barebones Django app, which can easily be deployed to Heroku.
