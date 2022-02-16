@@ -11,7 +11,7 @@ from ordered_set import OrderedSet
 # pass in a column and return a dictionary of how frequently trait occurs 
 # within column 
 def find_frequency_of_value(column):
-    #print(type(column))
+    # print(type(column))
     classes_set = OrderedSet(column)
     classes = np.array(list(classes_set))
     freq_labels = dict.fromkeys(classes, 0)
