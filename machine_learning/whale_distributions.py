@@ -24,18 +24,48 @@ def whale_distributions(transactions_link):
 
     transactions_data = np.array(transactions_data, dtype=object)
 
+    ''' FIND TOTALS OF OWNERS DISTRIBUTION IN THE WHOLE HISTORY '''
+
     transactions_data = transactions_data[~(transactions_data[:,4] == '0x0000000000000000000000000000000000000000')]
     transactions_data = transactions_data[~(transactions_data[:,-1] == '0')]
     
+    # frequency_of_sellers = find_frequency_of_value(transactions_data[:,4])
+    # frequency_of_buyers = find_frequency_of_value(transactions_data[:,5])
+    # frequency_of_purchases = find_frequency_of_value(transactions_data[:,6])
 
-    frequency_of_sellers = find_frequency_of_value(transactions_data[:,4])
-    frequency_of_buyers = find_frequency_of_value(transactions_data[:,5])
-    frequency_of_purchases = find_frequency_of_value(transactions_data[:,6])
+    # sorted_sellers = {k: v for k, v in sorted(frequency_of_sellers.items(), key = lambda item: item[1])}
+    # sorted_buyers = {k: v for k, v in sorted(frequency_of_buyers.items(), key = lambda item: item[1])}
+    # sorted_purchases = {k: v for k, v in sorted(frequency_of_purchases.items(), key = lambda item: item[1])}
+
+    ''' END '''
+
+    ''' FIND THE CURRENT DISTRUBUTION OF OWNERS I.E., FINAL TRANSACTIONS
+        OF OF EVERY NFT INDEX                                       '''
+
+    unique_id_list = list(OrderedSet(transactions_data[:,6]))
+    unique_id_array = np.empty((len(unique_id_list), 3), dtype=object)
+    unique_id_array[:,0] = unique_id_list
+    transactions_id_list = np.array(transactions_data[:,6], dtype=int)
+
+
+    for row in range(len(transactions_data)):
+        for row2 in range(len(unique_id_array)):
+            if(transactions_id_list[row] == int(unique_id_array[row2, 0])):
+                unique_id_array[row2, 1] = transactions_data[row, 4]
+                unique_id_array[row2, 2] = transactions_data[row, 5]
+                break                
+
+    print(unique_id_array)
+
+    frequency_of_sellers = find_frequency_of_value(unique_id_array[:,1])
+    frequency_of_buyers = find_frequency_of_value(unique_id_array[:,2])
+    frequency_of_purchases = find_frequency_of_value(unique_id_array[:,0])
 
     sorted_sellers = {k: v for k, v in sorted(frequency_of_sellers.items(), key = lambda item: item[1])}
     sorted_buyers = {k: v for k, v in sorted(frequency_of_buyers.items(), key = lambda item: item[1])}
     sorted_purchases = {k: v for k, v in sorted(frequency_of_purchases.items(), key = lambda item: item[1])}
 
+    ''' END '''
 
     # sorted_purchases = OrderedSet(sorted_purchases)
     # print(len(sorted_purchases))
@@ -45,8 +75,8 @@ def whale_distributions(transactions_link):
     # print(unique_seller_count)
     # print(unique_buyer_count)
 
-    print(sorted_purchases)
-    # print(sorted_buyers)
+    # print(sorted_purchases)
+    print(sorted_buyers)
     # print(sorted_sellers)
 
 
