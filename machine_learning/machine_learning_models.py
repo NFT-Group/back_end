@@ -34,6 +34,7 @@ import math
 from add_real_usd_prices import add_real_usd_prices
 from trait_distribution import trait_distribution
 from match_trait_dis_values import match_trait_dis_values
+from whale_distributions import whale_distributions
 
 from ordered_set import OrderedSet
 
@@ -89,9 +90,18 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
         
         transactions_data = add_real_usd_prices(transactions_data)
         final_column = transactions_data.shape[1]-1
+
         sell_counter = sell_count(transactions_data)
         assert transactions_data.shape[0] == sell_counter.shape[0]
         transactions_data = np.column_stack((transactions_data, sell_counter))
+
+        print(type(transactions_data))
+        current_seller_weight = whale_distributions(transactions_data)
+        print(transactions_data.shape)
+        print(current_seller_weight.shape)
+        assert transactions_data.shape[0] == current_seller_weight.shape[0]
+        transactions_data = np.column_stack((transactions_data, current_seller_weight))
+
         print(transactions_data)
         # print(final_column)
         my_temp_set = OrderedSet(unique_header_list)
