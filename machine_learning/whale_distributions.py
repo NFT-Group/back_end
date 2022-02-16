@@ -24,6 +24,10 @@ def whale_distributions(transactions_link):
 
     transactions_data = np.array(transactions_data, dtype=object)
 
+    transactions_data = transactions_data[~(transactions_data[:,4] == '0x0000000000000000000000000000000000000000')]
+    transactions_data = transactions_data[~(transactions_data[:,-1] == '0')]
+    
+
     frequency_of_sellers = find_frequency_of_value(transactions_data[:,4])
     frequency_of_buyers = find_frequency_of_value(transactions_data[:,5])
     frequency_of_purchases = find_frequency_of_value(transactions_data[:,6])
@@ -33,9 +37,17 @@ def whale_distributions(transactions_link):
     sorted_purchases = {k: v for k, v in sorted(frequency_of_purchases.items(), key = lambda item: item[1])}
 
 
+    # sorted_purchases = OrderedSet(sorted_purchases)
+    # print(len(sorted_purchases))
+    unique_seller_count = len(sorted_sellers)
+    unique_buyer_count = len(sorted_buyers)
 
-    # print(sorted_purchases)
-    print(sorted_buyers)
+    # print(unique_seller_count)
+    # print(unique_buyer_count)
+
+    print(sorted_purchases)
+    # print(sorted_buyers)
+    # print(sorted_sellers)
 
 
 

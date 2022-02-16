@@ -40,6 +40,25 @@ from ordered_set import OrderedSet
 
 warnings.filterwarnings("ignore")
 
+def sell_count(transactions_data):
+        unique_id = OrderedSet(transactions_data[:,-4])
+        unique_id = np.array(list(unique_id), dtype=int)
+        transactions_data_id_list = np.array(transactions_data[:,-4], dtype=int)
+        sell_count_array = np.zeros([len(transactions_data),1])
+
+        count_dict = dict.fromkeys(unique_id, 0)
+
+        for row in range(len(unique_id)):
+                for i, j in zip(range(len(transactions_data_id_list)), range(len(sell_count_array))):
+                        if(unique_id[row] == transactions_data_id_list[i]):
+                                count_dict[unique_id[row]] += 1
+                                sell_count_array[i,0] = count_dict[unique_id[row]]
+       
+
+        print("SELL COUNT ARRAY: ", sell_count_array)
+        return sell_count_array
+
+
 def data_combining_and_structuring(transactions_link, unique_nfts_link):
         transactions_data = []
         transactions_json = []
@@ -70,8 +89,13 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
         
         transactions_data = add_real_usd_prices(transactions_data)
         final_column = transactions_data.shape[1]-1
+        sell_counter = sell_count(transactions_data)
+        assert transactions_data.shape[0] == sell_counter.shape[0]
+        transactions_data = np.column_stack((transactions_data, sell_counter))
+        print(transactions_data)
         # print(final_column)
         my_temp_set = OrderedSet(unique_header_list)
+        
         transactions_data = match_trait_dis_values(transactions_data, trait_values_distribution, final_column, unique_header_list)
         # transactions_data.to_csv('out_data', index = False)
         trait_headers = list(my_temp_set)
