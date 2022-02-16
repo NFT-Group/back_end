@@ -53,6 +53,8 @@ def trait_distribution(unique_data, unique_json):
 
     # create trait values which will create a numpy array of all the trait values
     # for the correct header e.g. 'gold hoop' within 'earing' header
+    print(len(traitList))
+    print(len(unique_header_list))
     trait_values_np = np.empty([len(traitList) ,len(unique_header_list)], dtype=object)
     # print(trait_values_np.shape)
     # print(len(traitList))
@@ -61,7 +63,8 @@ def trait_distribution(unique_data, unique_json):
             if ((j % 4) == 1): 
                 for k in range(len(unique_header_list)):
                     if(unique_header_list[k] == traitList[i][j]):
-                        trait_values_np[i,k] = traitList[i][j+2]
+                        trait_values_np[i,k] = str(traitList[i][j+2])
+                        
 
 
     # get counts of how many traits each nft has

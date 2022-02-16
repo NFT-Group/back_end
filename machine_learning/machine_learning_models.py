@@ -320,7 +320,13 @@ for value in collection_addresses_dict.values():
         print(transactions_link)
         print(unique_nfts_link)
         create_data(transactions_link, unique_nfts_link, value)
-        
+
+# value = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
+# transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
+# unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/transactions/all_' + value + '.csv'
+# print(transactions_link)
+# print(unique_nfts_link)
+# create_data(transactions_link, unique_nfts_link, value)    
 
 
 # transactions_link = '/home/apb121/csv_files/0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B.csv'

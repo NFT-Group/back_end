@@ -23,8 +23,6 @@ def lookup_eth_price(date, eth_usd_csv):
 
 def add_real_usd_prices(data):
 
-
-
     purchase_date = []
     eth_price = []
     # print(type(data))
