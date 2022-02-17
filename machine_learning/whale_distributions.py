@@ -1,11 +1,6 @@
 import numpy as np
 from numpy import genfromtxt
 import pandas as pd
-import csv
-import re
-import sys
-import json
-import requests
 from ordered_set import OrderedSet
 import pathlib
 from trait_distribution import find_frequency_of_value

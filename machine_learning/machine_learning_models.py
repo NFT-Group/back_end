@@ -110,6 +110,7 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
         transactions_data = match_trait_dis_values(transactions_data, trait_values_distribution, final_column, unique_header_list)
         # transactions_data.to_csv('out_data', index = False)
         trait_headers = list(my_temp_set)
+        print("HERE\n", transactions_data)
 
         return(transactions_data, trait_headers)
 
@@ -262,14 +263,14 @@ def random_forest_reg(x_train, x_test, y_train, y_test):
         maxDepth=40
         models=[]
         for depth in range(minDepth,maxDepth,5):
-                regr=RandomForestRegressor(max_depth=depth, random_state=0,n_estimators=5,verbose=2)
+                regr=RandomForestRegressor(max_depth=depth, random_state=0,n_estimators=5)
                 regr.fit(x_train, y_train)
                 models.append(regr)
                 tr_error=math.sqrt(mean_squared_error(regr.predict(x_train),y_train))
                 te_error=math.sqrt(mean_squared_error(regr.predict(x_test),y_test))
                 test_error.append(tr_error)
                 train_error.append(te_error)
-                print (depth,tr_error,te_error)
+                # print (depth,tr_error,te_error)
         # train_plot=pd.DataFrame(train_error,index=range(20,40,5),columns=["test_Data"])
         # test_plot=pd.DataFrame(test_error,index=range(20,40,5),columns=["train_Data"])
         # plotdata=pd.concat([train_plot,test_plot],axis=1)
@@ -304,6 +305,7 @@ def run_regressions(data, headers, name):
         print("\n---------- Random Forest ----------\n")
         y_pred, y_test = random_forest_reg(x_train, x_test, y_train, y_test)
         analyse_results(y_pred, y_test)
+        print("\n\n")
         save_y_predict_vs_test(y_test, y_pred, name)
 
 def save_y_predict_vs_test(y_test, y_pred, name):
@@ -317,9 +319,13 @@ def create_data(transactions_link, unique_nfts_link, name):
         data, trait_headers = data_combining_and_structuring(transactions_link, unique_nfts_link)
         print(trait_headers)
         headers = trait_headers
-        headers.extend(['numberOfTraits', 'blockNumber', 'timestamp'])
-        print(headers)
-        run_regressions(data, trait_headers, name)
+        headers.extend(['numberOfTraits', 'blockNumber', 'timestamp', 'saleCount', 'current_seller_weight'])
+
+        testable_data = data.drop(['collectionIndex', 'commonNFTHash',
+                'hashNumber', 'seller', 'buyer',
+                'url', 'priceInUSD'], axis=1)
+        print(testable_data)
+        run_regressions(testable_data, trait_headers, name)
 
 
 
