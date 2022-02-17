@@ -35,6 +35,7 @@ from add_real_usd_prices import add_real_usd_prices
 from trait_distribution import trait_distribution
 from match_trait_dis_values import match_trait_dis_values
 from whale_distributions import whale_distributions
+from clean_null_data import clean_null_data_transactions_data
 
 from ordered_set import OrderedSet
 
@@ -84,7 +85,7 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
                         unique_json.append(json.dumps(json_temp["attributes"]))
                 except KeyError:
                         continue
-        print(unique_json[0])
+        # print(unique_json[0])
 
         unique_header_list, trait_values_distribution = trait_distribution(unique_data, unique_json)
         
@@ -95,14 +96,14 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
         assert transactions_data.shape[0] == sell_counter.shape[0]
         transactions_data = np.column_stack((transactions_data, sell_counter))
 
-        print(type(transactions_data))
+        # print(type(transactions_data))
         current_seller_weight = whale_distributions(transactions_data)
-        print(transactions_data.shape)
-        print(current_seller_weight.shape)
+        # print(transactions_data.shape)
+        # print(current_seller_weight.shape)
         assert transactions_data.shape[0] == current_seller_weight.shape[0]
         transactions_data = np.column_stack((transactions_data, current_seller_weight))
 
-        print(transactions_data)
+        # print(transactions_data)
         # print(final_column)
         my_temp_set = OrderedSet(unique_header_list)
         
@@ -348,19 +349,25 @@ collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodles
         "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
         "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
 
-# for value in collection_addresses_dict.values():
-#         transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
-#         unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/transactions/all_' + value + '.csv'
-#         print(transactions_link)
-#         print(unique_nfts_link)
-#         create_data(transactions_link, unique_nfts_link, value)
+for value in collection_addresses_dict.values():
+        transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
+        # unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/transactions/all_' + value + '.csv'
+        clean_null_data_transactions_data(transactions_link, value)
 
-value = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
-transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
-unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/transactions/all_' + value + '.csv'
-print(transactions_link)
-print(unique_nfts_link)
-create_data(transactions_link, unique_nfts_link, value)    
+for value in collection_addresses_dict.values():
+        transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/clean_transactions/' + value + '.csv'
+        unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/complete/all_' + value + '.csv'
+        print(transactions_link)
+        print(unique_nfts_link)
+        create_data(transactions_link, unique_nfts_link, value)
+
+# value = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
+# transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
+# unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/transactions/all_' + value + '.csv'
+# clean_null_data_transactions_data(transactions_link, value)
+# print(transactions_link)
+# print(unique_nfts_link)
+# create_data(transactions_link, unique_nfts_link, value)    
 
 
 # transactions_link = '/home/apb121/csv_files/0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B.csv'
