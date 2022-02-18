@@ -42,6 +42,32 @@ from ordered_set import OrderedSet
 
 warnings.filterwarnings("ignore")
 
+apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
+
+# cryptoPunkMDAddress = '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2'
+
+doodlesAddress = '0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e'
+
+coolCatsAddress = '0x1a92f7381b9f03921564a437210bb9396471050c'
+
+# cryptoKittiesAddress = '0x06012c8cf97bead5deae237070f9587f8e7a266d'
+
+cloneXAddress = '0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B'
+
+crypToadzAddress = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
+
+boredApeKennelAddress = '0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623'
+
+pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
+
+
+
+collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodlesAddress,
+        "coolCatsAddress": coolCatsAddress,
+        "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
+        "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
+
+
 def sell_count(transactions_data):
         unique_id = OrderedSet(transactions_data[:,-4])
         unique_id = np.array(list(unique_id), dtype=int)
@@ -123,9 +149,13 @@ def get_test_train_data(data, train_columns_string):
         y = data[predict_column]
         return (train_test_split(x, y, test_size=0.10,shuffle=False))
 
-def analyse_results(y_pred, y_test):
+def analyse_results(y_pred, y_test, name):
         #MSE
         from sklearn import metrics
+        print("----------" +
+                list(collection_addresses_dict.keys())[list(collection_addresses_dict.values()).index(name)]
+                + "----------\n\n")
+
         print('MSE:', metrics.mean_squared_error(y_test, y_pred))
 
         #MAPE
@@ -168,7 +198,7 @@ def linear_regression(x_train, x_test, y_train, y_test):
 
 def neural_networks(x_train, x_test, y_train, y_test):
 
-        MLP = MLPRegressor(hidden_layer_sizes=(10), activation='tanh', solver='lbfgs')
+        MLP = MLPRegressor(hidden_layer_sizes=(20, 40, 20), activation='tanh', solver='lbfgs')
         MLP.fit(x_train, y_train)
         #MLP = MLPRegressor(random_state=1, max_iter=500).fit(x_train, y_train)
         print("Prediction of x_test is")
@@ -298,21 +328,34 @@ def run_regressions(data, headers, name):
         x_train, x_test, y_train, y_test = get_test_train_data(data, headers)
         print("\n---------- Linear regression ----------\n")
         y_pred, y_test = linear_regression(x_train, x_test, y_train, y_test)
-        analyse_results(y_pred, y_test)
+        analyse_results(y_pred, y_test, name)
         print("\n---------- Elastic Net ----------\n")
         y_pred, y_test = elastic_net(x_train, x_test, y_train, y_test)
-        analyse_results(y_pred, y_test)
+        analyse_results(y_pred, y_test, name)
         print("\n---------- Random Forest ----------\n")
         y_pred, y_test = random_forest_reg(x_train, x_test, y_train, y_test)
-        analyse_results(y_pred, y_test)
+        analyse_results(y_pred, y_test, name)
         print("\n\n")
         save_y_predict_vs_test(y_test, y_pred, name)
+        save_y_predict_vs_test_NN(y_test, y_pred, name)
+        print("\n--------- MLP ---------\n")
+        y_pred, y_test = neural_networks(x_train, x_test, y_train, y_test)
+        analyse_results(y_pred, y_test, name)
+
+        # return (y_test, y_pred)
 
 def save_y_predict_vs_test(y_test, y_pred, name):
         y_test_vs_pred = np.zeros((len(y_test),2))
         y_test_vs_pred[:, 0] = y_test
         y_test_vs_pred[:, 1] = y_pred
         name = name + ".csv"
+        np.savetxt(name, y_test_vs_pred, delimiter=",")
+
+def save_y_predict_vs_test_NN(y_test, y_pred, name):
+        y_test_vs_pred = np.zeros((len(y_test),2))
+        y_test_vs_pred[:, 0] = y_test
+        y_test_vs_pred[:, 1] = y_pred
+        name = name + "_NN.csv"
         np.savetxt(name, y_test_vs_pred, delimiter=",")
 
 def create_data(transactions_link, unique_nfts_link, name):
@@ -326,38 +369,15 @@ def create_data(transactions_link, unique_nfts_link, name):
                 'url', 'priceInUSD'], axis=1)
         print(testable_data)
         run_regressions(testable_data, trait_headers, name)
+        # return y_test, y_pred
 
 
 
 
 
-apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
-
-# cryptoPunkMDAddress = '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2'
-doodlesAddress = '0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e'
-
-coolCatsAddress = '0x1a92f7381b9f03921564a437210bb9396471050c'
-
-# cryptoKittiesAddress = '0x06012c8cf97bead5deae237070f9587f8e7a266d'
-
-cloneXAddress = '0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B'
-
-crypToadzAddress = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
-
-boredApeKennelAddress = '0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623'
-
-pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
-
-
-
-collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodlesAddress,
-        "coolCatsAddress": coolCatsAddress,
-        "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
-        "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
 
 for value in collection_addresses_dict.values():
         transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
-        # unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/transactions/all_' + value + '.csv'
         clean_null_data_transactions_data(transactions_link, value)
 
 for value in collection_addresses_dict.values():
@@ -366,6 +386,7 @@ for value in collection_addresses_dict.values():
         print(transactions_link)
         print(unique_nfts_link)
         create_data(transactions_link, unique_nfts_link, value)
+
 
 # value = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
 # transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
