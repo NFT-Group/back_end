@@ -111,7 +111,10 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
                         unique_json.append(json.dumps(json_temp["attributes"]))
                 except KeyError:
                         continue
-        # print(unique_json[0])
+        print(type(unique_json))
+        print(unique_json[0])
+
+        # print("UNIQUE DATA FORMAT", unique_data)
 
         unique_header_list, trait_values_distribution = trait_distribution(unique_data, unique_json)
         
@@ -198,11 +201,7 @@ def linear_regression(x_train, x_test, y_train, y_test):
 
 def neural_networks(x_train, x_test, y_train, y_test):
 
-<<<<<<< HEAD
         MLP = MLPRegressor(hidden_layer_sizes=(20, 40, 20), activation='tanh', solver='lbfgs')
-=======
-        MLP = MLPRegressor(hidden_layer_sizes=(30, 10), activation='tanh', solver='lbfgs')
->>>>>>> 14de669901150628961f77e1da34f21e5a85fbd8
         MLP.fit(x_train, y_train)
         #MLP = MLPRegressor(random_state=1, max_iter=500).fit(x_train, y_train)
         print("Prediction of x_test is")
@@ -335,14 +334,7 @@ def run_regressions(data, headers, name):
         analyse_results(y_pred, y_test, name)
         print("\n---------- Elastic Net ----------\n")
         y_pred, y_test = elastic_net(x_train, x_test, y_train, y_test)
-<<<<<<< HEAD
         analyse_results(y_pred, y_test, name)
-=======
-        analyse_results(y_pred, y_test)
-        print("\n---------- Neural Network ----------\n")
-        y_pred, y_test = neural_networks(x_train, x_test, y_train, y_test)
-        analyse_results(y_pred, y_test)
->>>>>>> 14de669901150628961f77e1da34f21e5a85fbd8
         print("\n---------- Random Forest ----------\n")
         y_pred, y_test = random_forest_reg(x_train, x_test, y_train, y_test)
         analyse_results(y_pred, y_test, name)
@@ -387,15 +379,15 @@ def create_data(transactions_link, unique_nfts_link, name):
 
 
 
-for value in collection_addresses_dict.values():
-        transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
-        clean_null_data_transactions_data(transactions_link, value)
+# for value in collection_addresses_dict.values():
+        # transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/historical/past_' + value + '.csv'
+        # clean_null_data_transactions_data(transactions_link, value)
 
 for value in collection_addresses_dict.values():
         transactions_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/clean_transactions/' + value + '.csv'
         unique_nfts_link = str(pathlib.Path(__file__).parent.resolve()) + '/data/complete/all_' + value + '.csv'
-        print(transactions_link)
-        print(unique_nfts_link)
+        # print(transactions_link)
+        # print(unique_nfts_link)
         create_data(transactions_link, unique_nfts_link, value)
 
 
