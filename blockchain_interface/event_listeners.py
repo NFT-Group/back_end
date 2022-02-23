@@ -2,9 +2,22 @@ from web3 import Web3
 import contract_details as cd
 import time
 
+import numpy as np 
+import pandas as pd
+from datetime import datetime
+
+import firebase_admin
+from firebase_admin import credentials, firestore, db
+
 #on each redeploy scan blocks starting from most recent database entry for each contract
 
 web3 = Web3(Web3.WebsocketProvider('wss://mainnet.infura.io/ws/v3/15f211ab56884bfba42aba49864f6aa5', websocket_timeout=100, websocket_kwargs={'max_size': 1000000000}))
+
+def update_firebase():
+    cred_obj = firebase_admin.credentials.Certificate('key.json')
+    app = firebase_admin.initialize_app(cred_obj, {'databaseURL':'https://practice-firebase-52292-default-rtdb.europe-west1.firebasedatabase.app/'})
+    ref = db.reference('/newtest')
+    print(ref.get())
 
 def handle_event(event, contract, previous_hash = [" "]):
     print("=======================================")
@@ -67,4 +80,5 @@ def start_listening():
     log_loop(event_filters, contracts, 1)
 
 if __name__ == '__main__':
-    start_listening()
+    update_firebase()
+    #start_listening()

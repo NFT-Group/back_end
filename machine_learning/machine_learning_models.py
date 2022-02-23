@@ -156,7 +156,7 @@ def linear_regression(x_train, x_test, y_train, y_test):
 
 def neural_networks(x_train, x_test, y_train, y_test):
 
-        MLP = MLPRegressor(hidden_layer_sizes=(10), activation='tanh', solver='lbfgs')
+        MLP = MLPRegressor(hidden_layer_sizes=(30, 10), activation='tanh', solver='lbfgs')
         MLP.fit(x_train, y_train)
         #MLP = MLPRegressor(random_state=1, max_iter=500).fit(x_train, y_train)
         print("Prediction of x_test is")
@@ -289,6 +289,9 @@ def run_regressions(data, headers, name):
         analyse_results(y_pred, y_test)
         print("\n---------- Elastic Net ----------\n")
         y_pred, y_test = elastic_net(x_train, x_test, y_train, y_test)
+        analyse_results(y_pred, y_test)
+        print("\n---------- Neural Network ----------\n")
+        y_pred, y_test = neural_networks(x_train, x_test, y_train, y_test)
         analyse_results(y_pred, y_test)
         print("\n---------- Random Forest ----------\n")
         y_pred, y_test = random_forest_reg(x_train, x_test, y_train, y_test)
