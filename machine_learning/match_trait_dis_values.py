@@ -14,7 +14,9 @@ def match_trait_dis_values(transactions_data, trait_values_distribution, final_c
     # number_of_traits = trait_values_distribution.shape[1] - 1
     
     pd_trait_value_dis = pd.DataFrame(transactions_data, columns = 
-        ['commonNFTHash', 'hashNumber', 'blockNumber', 'timestamp', 'seller', 'buyer', 'collectionIndex', 'url', 'priceInETH', 'priceInUSD', 'saleCount'])
+        ['commonNFTHash', 'hashNumber', 'blockNumber', 'timestamp', 'seller',
+        'buyer', 'collectionIndex', 'url', 'priceInETH', 'priceInUSD', 'saleCount',
+        'current_seller_weight'])
 
     # print(unique_header_list)
     unique_header_list.insert(0, 'collectionIndex')
