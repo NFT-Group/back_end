@@ -139,15 +139,8 @@ bored_apes.transactions_df = pd.DataFrame(bored_apes.raw_transactions_data, colu
 # print(bored_apes.tokens_df)
 # print(bored_apes.transactions_headers)
 # print(bored_apes.raw_transactions_data)
-# print()
 
 # ADD SELLER COUNT AND REAL USD PRICE IN A ROBUST AND MOBILE WAY...
 
 count_dict = dict((id, 0) for id in list(bored_apes.tokens_df['tokenID']))
-
-
-
-
-
-
 
