@@ -69,6 +69,8 @@ collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodles
 
 
 def sell_count(transactions_data):
+        print(type(transactions_data))
+        print(transactions_data)
         unique_id = OrderedSet(transactions_data[:,-4])
         unique_id = np.array(list(unique_id), dtype=int)
         transactions_data_id_list = np.array(transactions_data[:,-4], dtype=int)
@@ -124,26 +126,26 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
         final_column = transactions_data.shape[1]-1
 
         sell_counter = sell_count(transactions_data)
-        assert transactions_data.shape[0] == sell_counter.shape[0]
-        transactions_data = np.column_stack((transactions_data, sell_counter))
+        # assert transactions_data.shape[0] == sell_counter.shape[0]
+        # transactions_data = np.column_stack((transactions_data, sell_counter))
 
-        # print(type(transactions_data))
-        current_seller_weight = whale_distributions(transactions_data)
-        # print(transactions_data.shape)
-        # print(current_seller_weight.shape)
-        assert transactions_data.shape[0] == current_seller_weight.shape[0]
-        transactions_data = np.column_stack((transactions_data, current_seller_weight))
+        # # print(type(transactions_data))
+        # current_seller_weight = whale_distributions(transactions_data)
+        # # print(transactions_data.shape)
+        # # print(current_seller_weight.shape)
+        # assert transactions_data.shape[0] == current_seller_weight.shape[0]
+        # transactions_data = np.column_stack((transactions_data, current_seller_weight))
 
-        # print(transactions_data)
-        # print(final_column)
-        my_temp_set = OrderedSet(unique_header_list)
+        # # print(transactions_data)
+        # # print(final_column)
+        # my_temp_set = OrderedSet(unique_header_list)
         
-        transactions_data = match_trait_dis_values(transactions_data, trait_values_distribution, final_column, unique_header_list)
-        # transactions_data.to_csv('out_data', index = False)
-        trait_headers = list(my_temp_set)
-        print("HERE\n", transactions_data)
+        # transactions_data = match_trait_dis_values(transactions_data, trait_values_distribution, final_column, unique_header_list)
+        # # transactions_data.to_csv('out_data', index = False)
+        # trait_headers = list(my_temp_set)
+        # print("HERE\n", transactions_data)
 
-        return(transactions_data, trait_headers)
+        # return(transactions_data, trait_headers)
 
 def get_test_train_data(data, train_columns_string):
         data["priceInETH"] = pd.to_numeric(data['priceInETH'], downcast = "float")
