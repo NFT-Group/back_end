@@ -114,7 +114,7 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
         print(type(unique_json))
         print(unique_json[0])
 
-        print(transactions_data)
+        print("TRANS DATA", transactions_data[0])
 
         # print("UNIQUE DATA FORMAT", unique_data)
 

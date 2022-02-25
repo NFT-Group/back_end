@@ -23,6 +23,20 @@ def split_data(collection):
 
     return id_list, metadata_list 
 
+def get_raw_transaction_data(collection):
+    # initial split of transactions data from ordered dict into a 
+    # list of headers and a list of all the raw data without headers
+
+    data_list = []
+
+    for id, other_data in bored_apes_trans.items():
+        transaction_hash = json.dumps(id)
+        data_temp = json.loads(json.dumps(other_data))
+        data_list.append(data_temp)
+        transactions_keys = list(data_list[0].keys())
+        transactions_values = [list(d.values()) for d in data_list]
+    
+    return transactions_keys, transactions_values
 
 
 apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
@@ -39,7 +53,6 @@ collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodles
         "coolCatsAddress": coolCatsAddress,
         "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
         "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
-
 
 # CREATE LINK FOR 'FULL DATABASE'
 
@@ -67,6 +80,8 @@ transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
 
 ref = db.reference('/', app=tokens_app)
 
+# JUST ONE BORED APES EXAMPLE FOR NOW BUT CAN MAKE THIS SECTION TRAVERSABLE LATER
+
 bored_apes = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
 bored_apes_kennel = ref.order_by_key().start_at('boredapekennel').end_at('cloneX')
 
@@ -75,25 +90,12 @@ unique_header_list, trait_values_distribution = trait_distribution(bored_ape_id_
 
 ref = db.reference('/', app=transactions_app)
 bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(10).get()
+bored_apes_trans_headers, bored_apes_trans_raw_data = get_raw_transaction_data(bored_apes_trans)
 
-data_list = []
-for id, other_data in bored_apes_trans.items():
-    transaction_hash = json.dumps(id)
-    data_temp = json.dumps(other_data)
-    print("DATA TEMP:", data_temp)
-    print(type(json.dumps(other_data)))
+# ADD SELLER COUNT AND REAL USD PRICE IN A ROBUST AND MOBILE WAY...
+   
 
 
-
-    
-
-
-
-# print(unique_header_list)
-# print(trait_values_distribution)
-
-# print(unique_header_list)
-# print(trait_values_distribution)
 
 
 
