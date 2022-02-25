@@ -107,13 +107,14 @@ def data_combining_and_structuring(transactions_link, unique_nfts_link):
                 temp = line.strip().split("|")
                 unique_data.append(temp[0])
                 json_temp = json.loads(temp[1])
-                print(json_temp)
                 try:
                         unique_json.append(json.dumps(json_temp["attributes"]))
                 except KeyError:
                         continue
         print(type(unique_json))
         print(unique_json[0])
+
+        print(transactions_data)
 
         # print("UNIQUE DATA FORMAT", unique_data)
 
