@@ -78,6 +78,8 @@ def sell_count(transactions_data):
 
         count_dict = dict.fromkeys(unique_id, 0)
 
+        print("TRANSACTIONS DATA IS LIST:", transactions_data_id_list)
+        print("SELL_COUNT_ARRAY:", sell_count_array)
         for row in range(len(unique_id)):
                 for i, j in zip(range(len(transactions_data_id_list)), range(len(sell_count_array))):
                         if(unique_id[row] == transactions_data_id_list[i]):
@@ -87,7 +89,6 @@ def sell_count(transactions_data):
 
         print("SELL COUNT ARRAY: ", sell_count_array)
         return sell_count_array
-
 
 def data_combining_and_structuring(transactions_link, unique_nfts_link):
         transactions_data = []

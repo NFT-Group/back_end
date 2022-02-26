@@ -25,13 +25,20 @@ def find_frequency_of_value(column):
 # of what percentage of times feature appears in collection 
 def trait_distribution(unique_data, unique_json):
     
+    # print("UNIQUE DATA", unique_json[0])
+    # exit()
     unique_data = np.array(unique_data).reshape([len(unique_data), 1])
     traitList = []
 
     # converting json formatted description of each NFTs traits into python
     # list format
+    print(unique_json)
+    print(type(unique_json))
+    exit()
     for i in range(len(unique_json)):
         traitList.append(re.findall('"([^"]*)"', unique_json[i]))
+
+    # print("TRAIT LIST", traitList)
 
     # json data is in format "Trait": TraitHeader : "Value" : value, we are only
     # interested in the trait header and the value of the header 
@@ -50,7 +57,6 @@ def trait_distribution(unique_data, unique_json):
     unique_header_list = list(my_temp_set)
     print(unique_header_list)
 
-
     # create trait values which will create a numpy array of all the trait values
     # for the correct header e.g. 'gold hoop' within 'earing' header
     print(len(traitList))
@@ -65,8 +71,6 @@ def trait_distribution(unique_data, unique_json):
                     if(unique_header_list[k] == traitList[i][j]):
                         trait_values_np[i,k] = str(traitList[i][j+2])
                         
-
-
     # get counts of how many traits each nft has
     number_of_traits = np.zeros([len(trait_values_np),1])
     for i in range(len(trait_values_np)):

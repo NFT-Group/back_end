@@ -6,66 +6,7 @@ from trait_distribution import trait_distribution
 import json
 import pathlib
 import pandas as pd
-
-class Collection:
-    trait_header_list = []
-    trati_header_list_mod = []
-    trait_distribution = []
-    tokens_df = pd.DataFrame()
-    transactions_headers = []
-    raw_transactions_data = []
-    transactions_df = pd.DataFrame()
-
-def split_data(tokens_from_collection):
-    # initial split of data from an OrderedDict into two lists
-
-    id_list = []
-    metadata_list = []
-
-    for id, meta in tokens_from_collection.items():
-        id_temp = json.dumps(meta["tokenid"])
-        id_list.append(id_temp)
-        metadata_temp = json.dumps(meta["metadata"])
-        metadata_temp = metadata_temp.replace("\\","")[1:-1]
-        metadata_temp = json.loads(metadata_temp)
-        metadata_temp = json.dumps(metadata_temp["attributes"])
-        metadata_list.append(metadata_temp)  
-
-    return id_list, metadata_list 
-
-def get_raw_transaction_data(transactions_from_collection):
-    # initial split of transactions data from ordered dict into a 
-    # list of headers and a list of all the raw data without headers
-
-    data_list = []
-
-    for id, other_data in transactions_from_collection.items():
-        transaction_hash = json.dumps(id)
-        data_temp = json.loads(json.dumps(other_data))
-        data_list.append(data_temp)
-        transactions_keys = list(data_list[0].keys())
-        transactions_values = [list(d.values()) for d in data_list]
-    
-    return transactions_keys, transactions_values
-
-def sell_count(transactions_data):
-        unique_id = OrderedSet(transactions_data[:,-4])
-        unique_id = np.array(list(unique_id), dtype=int)
-        transactions_data_id_list = np.array(transactions_data[:,-4], dtype=int)
-        sell_count_array = np.zeros([len(transactions_data),1])
-
-        count_dict = dict.fromkeys(unique_id, 0)
-
-        for row in range(len(unique_id)):
-                for i, j in zip(range(len(transactions_data_id_list)), range(len(sell_count_array))):
-                        if(unique_id[row] == transactions_data_id_list[i]):
-                                count_dict[unique_id[row]] += 1
-                                sell_count_array[i,0] = count_dict[unique_id[row]]
-       
-
-        print("SELL COUNT ARRAY: ", sell_count_array)
-        return sell_count_array
-
+from collection_class import Collection
 
 apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
 # cryptoPunkMDAddress = '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2'
@@ -109,30 +50,27 @@ transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
     'databaseURL':'https://allcollections-6e66c-default-rtdb.europe-west1.firebasedatabase.app/'
     }, name='transactions_app')
 
-ref = db.reference('/', app=tokens_app)
 
 # JUST ONE BORED APES EXAMPLE FOR NOW BUT CAN MAKE THIS SECTION TRAVERSABLE LATER
 
-bored_apes = Collection()
+ref = db.reference('/', app=tokens_app)
 bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
-
-bored_ape_id_list, bored_ape_metadata_list = split_data(bored_apes_data)
-bored_apes_trait_header_list, bored_apes_trait_values_distribution = trait_distribution(bored_ape_id_list, bored_ape_metadata_list)
-
 ref = db.reference('/', app=transactions_app)
-bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(10).get()
-bored_apes_transactions_headers, bored_apes_trans_raw_data = get_raw_transaction_data(bored_apes_trans)
+bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
+bored_apes = Collection(bored_apes_data, bored_apes_trans)
+bored_apes.prep_data()
+# bored_apes_trait_header_list, bored_apes_trait_values_distribution = trait_distribution(bored_apes_id_list, bored_apes_metadata_list)
 
-bored_apes.trait_header_list = bored_apes_trait_header_list
-bored_apes.trait_header_list_mod = bored_apes.trait_header_list
-bored_apes.trait_header_list_mod.insert(0,'tokenID')
-bored_apes.trait_header_list_mod.append('NumOfTraits')
+# bored_apes.trait_header_list = bored_apes_trait_header_list
+# bored_apes.trait_header_list_mod = bored_apes.trait_header_list
+# bored_apes.trait_header_list_mod.insert(0,'tokenID')
+# bored_apes.trait_header_list_mod.append('NumOfTraits')
 
-bored_apes.trait_distribution = bored_apes_trait_values_distribution
-bored_apes.tokens_df = pd.DataFrame(bored_apes.trait_distribution, columns = bored_apes.trait_header_list_mod)
-bored_apes.transactions_headers = bored_apes_transactions_headers
-bored_apes.raw_transactions_data = bored_apes_trans_raw_data
-bored_apes.transactions_df = pd.DataFrame(bored_apes.raw_transactions_data, columns = bored_apes_transactions_headers)
+# bored_apes.trait_distribution = bored_apes_trait_values_distribution
+# bored_apes.tokens_df = pd.DataFrame(bored_apes.trait_distribution, columns = bored_apes.trait_header_list_mod)
+# bored_apes.transactions_headers = bored_apes_transactions_headers
+# bored_apes.raw_transactions_data = bored_apes_trans_raw_data
+# bored_apes.transactions_df = pd.DataFrame(bored_apes.raw_transactions_data, columns = bored_apes_transactions_headers)
 
 # print(bored_apes.trait_header_list)
 # print(bored_apes_trait_values_distribution)
@@ -142,5 +80,7 @@ bored_apes.transactions_df = pd.DataFrame(bored_apes.raw_transactions_data, colu
 
 # ADD SELLER COUNT AND REAL USD PRICE IN A ROBUST AND MOBILE WAY...
 
-count_dict = dict((id, 0) for id in list(bored_apes.tokens_df['tokenID']))
+
+# count_dict = dict((id, 0) for id in list(bored_apes.tokens_df['tokenID']))
+# print(count_dict)
 
