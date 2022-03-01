@@ -56,6 +56,7 @@ transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
 ref = db.reference('/', app=tokens_app)
 bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
 ref = db.reference('/', app=transactions_app)
+# bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
 bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
 bored_apes = Collection(bored_apes_data, bored_apes_trans)
 bored_apes.prep_data()

@@ -14,32 +14,41 @@ class Collection:
         self.og_trans_data = og_trans_data
 
     def prep_data(self):
+        # read in data from firebase into manageable formats
         self.split_data(self.og_token_data)
         self.get_raw_transaction_data(self.og_trans_data)
+        # determine trait distribution
         self.trait_distribution()
         self.trait_header_list_mod = self.trait_header_list
         self.trait_header_list_mod.insert(0, 'tokenID')
         self.trait_header_list_mod.append('NumOfTraits')
         self.tokens_df = pd.DataFrame(self.trait_values_distribution, columns = self.trait_header_list_mod)
         self.transactions_df = pd.DataFrame(self.transactions_values, columns = self.transactions_keys)
-        self.sell_count()
+        self.add_sell_count()
+        self.add_whale_distribution()
+
+        print(self.transactions_df)
+
+        # self.transactions_df.to_pickle("transactions_df.pkl")
+        # self.tokens_df.to_pickle("tokens_df.pkl")
+
 
     def split_data(self, og_token_data):
         # initial split of data from an OrderedDict into two lists
 
-        self.id_list = []
+        self.token_id_list = []
         self.metadata_list = []
 
         for id, meta in self.og_token_data.items():
             id_temp = json.dumps(meta["tokenid"])
-            self.id_list.append(id_temp)
+            self.token_id_list.append(id_temp)
             metadata_temp = json.dumps(meta["metadata"])
             metadata_temp = metadata_temp.replace("\\","")[1:-1]
             metadata_temp = json.loads(metadata_temp)
             metadata_temp = json.dumps(metadata_temp["attributes"])
             self.metadata_list.append(metadata_temp)  
 
-        # self.id_list = id_list
+        # self.token_id_list = token_id_list
         # self.metadata_list = metadata_list
 
     def get_raw_transaction_data(self, og_trans_data):
@@ -58,59 +67,40 @@ class Collection:
         self.transactions_keys = transactions_keys
         self.transactions_values = transactions_values
 
-    def sell_count(self):
+    def add_sell_count(self):
 
             # will append the dataframe with a running count of how many times
             # that particular NFT has sold
 
-            print(self.tokens_df)
             self.count_dict = dict.fromkeys(list(self.tokens_df['tokenID']), 0)
 
             # count_dict = dict.fromkeys(unique_id, 0)
 
             self.transactions_id_list = self.transactions_df['tokenid'].tolist()
 
-            # print(self.count_dict)
-
+            self.sell_count_array = np.zeros([len(self.transactions_id_list), 1])
             for i in range(len(self.transactions_id_list)):
-                print(self.transactions_id_list[i])
-                if(not (self.transactions_id_list[i] > len(self.id_list))):
-                    self.count_dict[str(self.transactions_id_list[i])] += 1
+                if(self.transactions_id_list[i] <= len(self.token_id_list)):
+                    try:
+                        self.count_dict[str(self.transactions_id_list[i])] += 1
+                        self.sell_count_array[i, 0] = self.count_dict[str(self.transactions_id_list[i])]
+                    except KeyError:
+                        continue
 
-            print(self.count_dict)
-            
-            # for row in range(count_dict):
-            #         for i, j in zip(range(len(transactions_data_id_list)), range(len(sell_count_array))):
-            #                 if(unique_id[row] == transactions_data_id_list[i]):
-            #                         count_dict[unique_id[row]] += 1
-            #                         sell_count_array[i,0] = count_dict[unique_id[row]]
-          
+            self.transactions_df = self.transactions_df.assign(
+                running_sell_count = self.sell_count_array.tolist())        
         
     def trait_distribution(self):
         # determine distribution of traits from a file input, outputs a list of 
         # unique header values (e.g. 'earing', 'fur colour' etc. ) and an numpy array
         # of what percentage of times feature appears in collection 
-        # # print(self.id_list[0])
-        # print(self.metadata_list)
-        # print(type(self.metadata_list))
-        # exit()
-        self.id_list_np = np.array(self.id_list).reshape([len(self.id_list), 1])
+        self.id_list_np = np.array(self.token_id_list).reshape([len(self.token_id_list), 1])
         traitList = []
-
-        # print(self.metadata_list.shape)
-
-
-        # print(self.metadata_list)
-        # print(type(self.metadata_list))
-        # exit()
 
         # converting json formatted description of each NFTs traits into python
         # list format
         for i in range(len(self.id_list_np)):
             traitList.append(re.findall('"([^"]*)"', self.metadata_list[i]))
-
-        # print(traitList)
-        # exit()
 
         # json data is in format "Trait": TraitHeader : "Value" : value, we are only
         # interested in the trait header and the value of the header 
@@ -121,22 +111,14 @@ class Collection:
             for j in range(len(traitList[i])):
                 if ((j % 4) == 1):
                     trait_header_list.append(traitList[i][j])
-
-        # print(trait_header_list)
-        # exit()
         
         # make the header list unique (using orderedlist to stop non-determinism)
         my_temp_set = OrderedSet(trait_header_list)
         unique_header_list = list(my_temp_set)
-        print(unique_header_list)
 
         # create trait values which will create a numpy array of all the trait values
         # for the correct header e.g. 'gold hoop' within 'earing' header
-        print(len(traitList))
-        print(len(unique_header_list))
         trait_values_np = np.empty([len(traitList) ,len(unique_header_list)], dtype=object)
-        # print(trait_values_np.shape)
-        # print(len(traitList))
         for i in range(len(traitList)):
             for j in range(len(traitList[i])):
                 if ((j % 4) == 1): 
@@ -184,3 +166,72 @@ class Collection:
 
         self.trait_header_list = unique_header_list
         self.trait_values_distribution = trait_values_distribution
+
+    def add_whale_distribution(self):
+
+        ''' FIND THE CURRENT DISTRUBUTION OF OWNERS I.E., FINAL TRANSACTIONS
+        OF OF EVERY NFT INDEX '''
+
+        final_owners_list = self.transactions_df['tokenid'].unique()
+        unique_id_array = np.empty((len(final_owners_list), 3), dtype=object)
+        unique_id_array[:,0] = final_owners_list
+        transactions_id_list = np.array(self.transactions_df['tokenid'], dtype=int)
+
+        for row in range(self.transactions_df.shape[0]):
+            for row2 in range(len(unique_id_array)):
+                if(transactions_id_list[row] == int(unique_id_array[row2, 0])):
+                    unique_id_array[row2, 1] = self.transactions_df.loc[self.transactions_df.index[row], 'fromaddress']
+                    unique_id_array[row2, 2] = self.transactions_df.loc[self.transactions_df.index[row], 'toaddress']
+                    break
+
+
+        frequency_of_sellers = find_frequency_of_value(unique_id_array[:,1])
+        frequency_of_buyers = find_frequency_of_value(unique_id_array[:,2])
+        frequency_of_purchases = find_frequency_of_value(unique_id_array[:,0])
+
+        sorted_final_sellers = {k: v for k, v in sorted(frequency_of_sellers.items(), key = lambda item: item[1])}
+        sorted_final_buyers = {k: v for k, v in sorted(frequency_of_buyers.items(), key = lambda item: item[1])}
+        sorted_final_purchases = {k: v for k, v in sorted(frequency_of_purchases.items(), key = lambda item: item[1])}
+
+        ''' INTIIALISE THE FINAL DISTRIBUTION IN THE DICTIONARY FOR BUYERS
+        AND SELLERS AND REVERSE ENGINEER THE INITIAL DISTRIBUTION WITH IT'''
+
+        reverse_transaction_data = self.transactions_df.iloc[::-1]
+        initial_reverse_buyers = sorted_final_buyers
+
+        list_of_sellers = self.transactions_df['fromaddress']
+        list_of_buyers = self.transactions_df['toaddress']
+        list_of_buyers_and_sellers = list_of_buyers + list_of_sellers
+        unique_list_of_buyers_and_sellers = OrderedSet(list_of_buyers_and_sellers)
+        dict_of_buy_sell = dict.fromkeys(unique_list_of_buyers_and_sellers,0)
+
+        dict_of_buy_sell_final = dict_of_buy_sell
+        dict_of_buy_sell_final.update(initial_reverse_buyers)
+
+        for row in range(len(reverse_transaction_data)):
+            try:
+                dict_of_buy_sell[reverse_transaction_data.loc[self.transactions_df.index[row], 'fromaddress']] += 1
+                dict_of_buy_sell[reverse_transaction_data.loc[self.transactions_df.index[row], 'toaddress']] -= 1
+            except KeyError:
+                continue
+
+        ''' INTIALISE STARTING SELLER OWNERSHIP WITH REVERSE ENGINEERED DATA
+        AND THEN CREATE ARRAY OF 'CURRENT SELLER WEIGHT', UPDATED
+        AFTER EACH TRANSACTION '''
+
+        seller_current_weight = np.zeros([self.transactions_df.shape[0], 1], dtype=int)
+
+        for row in range(self.transactions_df.shape[0]):
+            try:
+                seller_current_weight[row] = dict_of_buy_sell[
+                    self.transactions_df.loc[
+                        self.transactions_df.index[row], 'fromaddress']]
+                dict_of_buy_sell[self.transactions_df.loc[
+                    self.transactions_df.index[row], 'fromaddress']] -= 1
+                dict_of_buy_sell[self.transactions_df.loc[
+                    self.transactions_df.index[row], 'toaddress']] += 1
+            except KeyError:
+                continue
+
+        self.transactions_df = self.transactions_df.assign(
+            running_whale_weight = self.sell_count_array.tolist())     
