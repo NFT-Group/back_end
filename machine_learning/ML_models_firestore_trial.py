@@ -57,30 +57,9 @@ ref = db.reference('/', app=tokens_app)
 bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
 ref = db.reference('/', app=transactions_app)
 # bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
-bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
+bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(5000).get()
 bored_apes = Collection(bored_apes_data, bored_apes_trans)
 bored_apes.prep_data()
-# bored_apes_trait_header_list, bored_apes_trait_values_distribution = trait_distribution(bored_apes_id_list, bored_apes_metadata_list)
-
-# bored_apes.trait_header_list = bored_apes_trait_header_list
-# bored_apes.trait_header_list_mod = bored_apes.trait_header_list
-# bored_apes.trait_header_list_mod.insert(0,'tokenID')
-# bored_apes.trait_header_list_mod.append('NumOfTraits')
-
-# bored_apes.trait_distribution = bored_apes_trait_values_distribution
-# bored_apes.tokens_df = pd.DataFrame(bored_apes.trait_distribution, columns = bored_apes.trait_header_list_mod)
-# bored_apes.transactions_headers = bored_apes_transactions_headers
-# bored_apes.raw_transactions_data = bored_apes_trans_raw_data
-# bored_apes.transactions_df = pd.DataFrame(bored_apes.raw_transactions_data, columns = bored_apes_transactions_headers)
-
-# print(bored_apes.trait_header_list)
-# print(bored_apes_trait_values_distribution)
-# print(bored_apes.tokens_df)
-# print(bored_apes.transactions_headers)
-# print(bored_apes.raw_transactions_data)
-
-# ADD SELLER COUNT AND REAL USD PRICE IN A ROBUST AND MOBILE WAY...
-
 
 # count_dict = dict((id, 0) for id in list(bored_apes.tokens_df['tokenID']))
 # print(count_dict)

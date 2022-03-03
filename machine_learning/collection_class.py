@@ -22,8 +22,10 @@ class Collection:
         self.trait_header_list_mod = self.trait_header_list
         self.trait_header_list_mod.insert(0, 'tokenID')
         self.trait_header_list_mod.append('NumOfTraits')
-        self.tokens_df = pd.DataFrame(self.trait_values_distribution, columns = self.trait_header_list_mod)
-        self.transactions_df = pd.DataFrame(self.transactions_values, columns = self.transactions_keys)
+        self.tokens_df = pd.DataFrame(
+            self.trait_values_distribution, columns = self.trait_header_list_mod)
+        self.transactions_df = pd.DataFrame(
+            self.transactions_values, columns = self.transactions_keys)
         self.add_sell_count()
         self.add_whale_distribution()
 
@@ -83,7 +85,8 @@ class Collection:
                 if(self.transactions_id_list[i] <= len(self.token_id_list)):
                     try:
                         self.count_dict[str(self.transactions_id_list[i])] += 1
-                        self.sell_count_array[i, 0] = self.count_dict[str(self.transactions_id_list[i])]
+                        self.sell_count_array[i, 0] = self.count_dict[
+                            str(self.transactions_id_list[i])]
                     except KeyError:
                         continue
 
@@ -94,7 +97,8 @@ class Collection:
         # determine distribution of traits from a file input, outputs a list of 
         # unique header values (e.g. 'earing', 'fur colour' etc. ) and an numpy array
         # of what percentage of times feature appears in collection 
-        self.id_list_np = np.array(self.token_id_list).reshape([len(self.token_id_list), 1])
+        self.id_list_np = np.array(self.token_id_list).reshape([
+            len(self.token_id_list), 1])
         traitList = []
 
         # converting json formatted description of each NFTs traits into python
@@ -118,7 +122,7 @@ class Collection:
 
         # create trait values which will create a numpy array of all the trait values
         # for the correct header e.g. 'gold hoop' within 'earing' header
-        trait_values_np = np.empty([len(traitList) ,len(unique_header_list)], dtype=object)
+        trait_values_np = np.empty([len(traitList),len(unique_header_list)], dtype=object)
         for i in range(len(traitList)):
             for j in range(len(traitList[i])):
                 if ((j % 4) == 1): 
@@ -129,7 +133,8 @@ class Collection:
         # get counts of how many traits each nft has
         number_of_traits = np.zeros([len(trait_values_np),1])
         for i in range(len(trait_values_np)):
-            number_of_traits[i,0] = len(unique_header_list) - np.count_nonzero(trait_values_np[i,:] == None)
+            number_of_traits[i,0] = len(unique_header_list) - np.count_nonzero(
+                trait_values_np[i,:] == None)
 
         # return a dictionary of the distributions of each quantity of traits
         number_of_traits = number_of_traits.astype(str)
@@ -180,8 +185,10 @@ class Collection:
         for row in range(self.transactions_df.shape[0]):
             for row2 in range(len(unique_id_array)):
                 if(transactions_id_list[row] == int(unique_id_array[row2, 0])):
-                    unique_id_array[row2, 1] = self.transactions_df.loc[self.transactions_df.index[row], 'fromaddress']
-                    unique_id_array[row2, 2] = self.transactions_df.loc[self.transactions_df.index[row], 'toaddress']
+                    unique_id_array[row2, 1] = self.transactions_df.loc[
+                        self.transactions_df.index[row], 'fromaddress']
+                    unique_id_array[row2, 2] = self.transactions_df.loc[
+                        self.transactions_df.index[row], 'toaddress']
                     break
 
 
@@ -189,9 +196,12 @@ class Collection:
         frequency_of_buyers = find_frequency_of_value(unique_id_array[:,2])
         frequency_of_purchases = find_frequency_of_value(unique_id_array[:,0])
 
-        sorted_final_sellers = {k: v for k, v in sorted(frequency_of_sellers.items(), key = lambda item: item[1])}
-        sorted_final_buyers = {k: v for k, v in sorted(frequency_of_buyers.items(), key = lambda item: item[1])}
-        sorted_final_purchases = {k: v for k, v in sorted(frequency_of_purchases.items(), key = lambda item: item[1])}
+        sorted_final_sellers = {k: v for k, v in sorted(
+            frequency_of_sellers.items(), key = lambda item: item[1])}
+        sorted_final_buyers = {k: v for k, v in sorted(
+            frequency_of_buyers.items(), key = lambda item: item[1])}
+        sorted_final_purchases = {k: v for k, v in sorted(
+            frequency_of_purchases.items(), key = lambda item: item[1])}
 
         ''' INTIIALISE THE FINAL DISTRIBUTION IN THE DICTIONARY FOR BUYERS
         AND SELLERS AND REVERSE ENGINEER THE INITIAL DISTRIBUTION WITH IT'''
@@ -210,8 +220,10 @@ class Collection:
 
         for row in range(len(reverse_transaction_data)):
             try:
-                dict_of_buy_sell[reverse_transaction_data.loc[self.transactions_df.index[row], 'fromaddress']] += 1
-                dict_of_buy_sell[reverse_transaction_data.loc[self.transactions_df.index[row], 'toaddress']] -= 1
+                dict_of_buy_sell[reverse_transaction_data.loc[
+                    self.transactions_df.index[row], 'fromaddress']] += 1
+                dict_of_buy_sell[reverse_transaction_data.loc[
+                    self.transactions_df.index[row], 'toaddress']] -= 1
             except KeyError:
                 continue
 
