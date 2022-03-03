@@ -2,7 +2,6 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 import numpy as np
-from trait_distribution import trait_distribution 
 import json
 import pathlib
 import pandas as pd
@@ -22,9 +21,6 @@ collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodles
         "coolCatsAddress": coolCatsAddress,
         "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
         "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
-
-
-
 
 # CREATE LINK FOR 'FULL DATABASE'
 
@@ -56,8 +52,8 @@ transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
 ref = db.reference('/', app=tokens_app)
 bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
 ref = db.reference('/', app=transactions_app)
-# bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
-bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(5000).get()
+bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
+# bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(5000).get()
 bored_apes = Collection(bored_apes_data, bored_apes_trans)
 bored_apes.prep_data()
 

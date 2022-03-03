@@ -29,7 +29,12 @@ class Collection:
         self.add_sell_count()
         self.add_whale_distribution()
 
-        print(self.transactions_df)
+        self.tokens_df = self.tokens_df.astype({'tokenID': 'int64'})
+        self.transactions_df = self.transactions_df.astype({'tokenid':'int64'})
+        self.prepped_df = self.tokens_df.merge(
+            self.transactions_df, left_on='tokenID', right_on='tokenid', how='inner')
+        # self.prepped_df.sort_values('timestamp', inplace = True)
+        print(self.prepped_df)
 
         # self.transactions_df.to_pickle("transactions_df.pkl")
         # self.tokens_df.to_pickle("tokens_df.pkl")
