@@ -6,9 +6,10 @@ import json
 import pathlib
 import pandas as pd
 from collection_class import Collection
+from preprocess import preprocess
 
 apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
-# cryptoPunkMDAddress = '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2'
+cryptoPunkMDAddress = '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2'
 doodlesAddress = '0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e'
 coolCatsAddress = '0x1a92f7381b9f03921564a437210bb9396471050c'
 # cryptoKittiesAddress = '0x06012c8cf97bead5deae237070f9587f8e7a266d'
@@ -49,13 +50,23 @@ transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
 
 # JUST ONE BORED APES EXAMPLE FOR NOW BUT CAN MAKE THIS SECTION TRAVERSABLE LATER
 
-ref = db.reference('/', app=tokens_app)
-bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
-ref = db.reference('/', app=transactions_app)
-bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
-# bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(5000).get()
-bored_apes = Collection(bored_apes_data, bored_apes_trans)
-bored_apes.prep_data()
+# ref = db.reference('/', app=tokens_app)
+# bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
+# ref = db.reference('/', app=transactions_app)
+# bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
+# # cryptopunks = ref.order_by_child('contracthash').equal_to(cryptoPunkMDAddress).limit_to_first(5).get()
+# # print(cryptopunks)
+# # bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(5000).get()
+# bored_apes = Collection(bored_apes_data, bored_apes_trans)
+# bored_apes.prep_data()
+# print(bored_apes.prepped_df)
+# bored_apes.prepped_df.to_json()
+
+prepped_df = pd.read_pickle("apes_prepped_df.pkl")
+preprocess(prepped_df)
+
+# testable_data = prepped_df.drop([''])
+
 
 # count_dict = dict((id, 0) for id in list(bored_apes.tokens_df['tokenID']))
 # print(count_dict)

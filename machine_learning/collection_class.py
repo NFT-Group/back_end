@@ -14,27 +14,35 @@ class Collection:
         self.og_trans_data = og_trans_data
 
     def prep_data(self):
+
         # read in data from firebase into manageable formats
         self.split_data(self.og_token_data)
         self.get_raw_transaction_data(self.og_trans_data)
+
         # determine trait distribution
         self.trait_distribution()
         self.trait_header_list_mod = self.trait_header_list
         self.trait_header_list_mod.insert(0, 'tokenID')
         self.trait_header_list_mod.append('NumOfTraits')
+
+        # format a couple dataframes
         self.tokens_df = pd.DataFrame(
             self.trait_values_distribution, columns = self.trait_header_list_mod)
         self.transactions_df = pd.DataFrame(
             self.transactions_values, columns = self.transactions_keys)
+
+        # add derived information for ML
         self.add_sell_count()
         self.add_whale_distribution()
-
+        
+        # combine dataframes into one megaframe
         self.tokens_df = self.tokens_df.astype({'tokenID': 'int64'})
         self.transactions_df = self.transactions_df.astype({'tokenid':'int64'})
         self.prepped_df = self.tokens_df.merge(
             self.transactions_df, left_on='tokenID', right_on='tokenid', how='inner')
-        # self.prepped_df.sort_values('timestamp', inplace = True)
         print(self.prepped_df)
+
+        self.prepped_df.to_pickle("apes_prepped_df.pkl")
 
         # self.transactions_df.to_pickle("transactions_df.pkl")
         # self.tokens_df.to_pickle("tokens_df.pkl")
@@ -85,12 +93,12 @@ class Collection:
 
             self.transactions_id_list = self.transactions_df['tokenid'].tolist()
 
-            self.sell_count_array = np.zeros([len(self.transactions_id_list), 1])
+            self.sell_count_array = np.zeros([len(self.transactions_id_list)])
             for i in range(len(self.transactions_id_list)):
                 if(self.transactions_id_list[i] <= len(self.token_id_list)):
                     try:
                         self.count_dict[str(self.transactions_id_list[i])] += 1
-                        self.sell_count_array[i, 0] = self.count_dict[
+                        self.sell_count_array[i] = self.count_dict[
                             str(self.transactions_id_list[i])]
                     except KeyError:
                         continue
