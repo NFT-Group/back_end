@@ -6,6 +6,9 @@ from ordered_set import OrderedSet
 import pandas as pd
 import re
 from trait_distribution import find_frequency_of_value
+from datetime import datetime
+import time
+import calendar
 
 class Collection:
 
@@ -42,7 +45,12 @@ class Collection:
             self.transactions_df, left_on='tokenID', right_on='tokenid', how='inner')
         print(self.prepped_df)
 
-        self.prepped_df.to_pickle("apes_prepped_df.pkl")
+        # preprocess said megaframe for ML goodness
+        # the goodness will be inputted into self.preprocessed_df
+        self.preprocess()
+        print(self.preprocessed_df)
+
+        self.prepped_df.to_pickle("apes_preprocessed_df.pkl")
 
         # self.transactions_df.to_pickle("transactions_df.pkl")
         # self.tokens_df.to_pickle("tokens_df.pkl")
@@ -259,4 +267,45 @@ class Collection:
                 continue
 
         self.transactions_df = self.transactions_df.assign(
-            running_whale_weight = self.sell_count_array.tolist())     
+            running_whale_weight = self.sell_count_array.tolist())   
+
+    def preprocess(self):
+
+        # REMOVED ROWS WHICH HAVE GARABAGE VALUES
+        self.preprocessed_df = self.prepped_df[
+            self.prepped_df.fromaddress != '0x0000000000000000000000000000000000000000']
+        self.preprocessed_df = self.preprocessed_df[
+            self.preprocessed_df.ethprice != '0.00']
+
+        # REMOVE COLUMNS WHICH WON'T BE USED
+        self.preprocessed_df = self.preprocessed_df.drop([
+            'tokenid',
+            'fromaddress', 
+            'toaddress', 
+            'tokenuri',
+            'transactionhash',
+            'blocknumber',
+            'contracthash'
+            ], axis=1)
+
+        now = datetime.now()
+        self.preprocessed_df.timestamp = pd.to_datetime(
+            self.preprocessed_df.timestamp)
+        self.preprocessed_df.timestamp = now - self.preprocessed_df.timestamp
+        self.preprocessed_df.timestamp = self.preprocessed_df.timestamp.apply(
+            lambda x: x.total_seconds())
+
+        # NORMALISE DATA WHICH NEEDS NORMALISING
+        self.preprocessed_df.running_sell_count = self._normalise(
+            self.preprocessed_df.running_sell_count.astype(float))
+        self.preprocessed_df.running_whale_weight = self._normalise(
+            self.preprocessed_df.running_whale_weight.astype(float))
+        self.preprocessed_df.timestamp = self._normalise(
+            self.preprocessed_df.timestamp.astype(float))
+
+        print(self.preprocessed_df)
+        # RETURN
+
+    def _normalise(self, column):
+        normal_col = (column - column.min()) / (column.max() - column.min())
+        return normal_col  

@@ -32,23 +32,10 @@ def preprocess(collection_df):
     # NORMALISE DATA WHICH NEEDS NORMALISING
     testable_data.running_sell_count = normalise(testable_data.running_sell_count.astype(float))
     testable_data.running_whale_weight = normalise(testable_data.running_whale_weight.astype(float))
-    # although the following line normalise time data, is there a way we can 
-    # give more weight to closer times and dates than farther ones?
     testable_data.timestamp = normalise(testable_data.timestamp.astype(float))
 
-    example = '2021-11-15'
-    example_new = datetime.strptime(example, "%Y-%m-%d")
-    now = datetime.now()
-    difference = now - example_new
-
-    print(type(difference))
-    print(now)
-    print(example_new)
-    
-
-
     print(testable_data)
-
+    self.preprocessed_df = testable_data
     # RETURN
 
 def normalise(column):
