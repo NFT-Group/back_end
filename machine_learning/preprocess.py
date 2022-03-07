@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 import dateutil.parser
+from datetime import datetime
+import time
+import calendar
 
 def preprocess(collection_df):
 
@@ -21,12 +24,27 @@ def preprocess(collection_df):
         'contracthash'
         ], axis=1)
 
+    now = datetime.now()
+    testable_data.timestamp = pd.to_datetime(testable_data.timestamp)
+    testable_data.timestamp = now - testable_data.timestamp
+    testable_data.timestamp = testable_data.timestamp.apply(lambda x: x.total_seconds())
+
     # NORMALISE DATA WHICH NEEDS NORMALISING
     testable_data.running_sell_count = normalise(testable_data.running_sell_count.astype(float))
     testable_data.running_whale_weight = normalise(testable_data.running_whale_weight.astype(float))
-    # doesn't work becauser it thinks it takes the column as a series 
-    # rather than going element wise
-    testable_data.timestamp = dateutil.parser.parse(testable_data.timestamp)
+    # although the following line normalise time data, is there a way we can 
+    # give more weight to closer times and dates than farther ones?
+    testable_data.timestamp = normalise(testable_data.timestamp.astype(float))
+
+    example = '2021-11-15'
+    example_new = datetime.strptime(example, "%Y-%m-%d")
+    now = datetime.now()
+    difference = now - example_new
+
+    print(type(difference))
+    print(now)
+    print(example_new)
+    
 
 
     print(testable_data)
