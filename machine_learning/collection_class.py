@@ -318,3 +318,6 @@ class Collection:
     def _normalise(self, column):
         normal_col = (column - column.min()) / (column.max() - column.min())
         return normal_col  
+
+    def find_the_wailords(self):
+        
