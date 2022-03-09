@@ -15,17 +15,25 @@ from ML_Models import random_forest_reg
 apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
 cryptoPunkMDAddress = '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2'
 doodlesAddress = '0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e'
-coolCatsAddress = '0x1a92f7381b9f03921564a437210bb9396471050c'
+coolCatsAddressArchive = '0x1a92f7381b9f03921564a437210bb9396471050c'
+coolCatsAddress = '0x1A92f7381B9F03921564a437210bB9396471050C'
+cryptoPunkAddress = '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB'
 # cryptoKittiesAddress = '0x06012c8cf97bead5deae237070f9587f8e7a266d'
 cloneXAddress = '0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B'
 crypToadzAddress = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
 boredApeKennelAddress = '0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623'
 pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
 
-collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodlesAddress,
-        "coolCatsAddress": coolCatsAddress,
-        "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
-        "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
+# collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodlesAddress,
+#         "coolCatsAddress": coolCatsAddress,
+#         "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
+#         "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
+
+#readd punks
+list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
+collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress,
+    "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress,
+    "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
 
 # CREATE LINK FOR 'FULL DATABASE'
 
@@ -52,31 +60,71 @@ transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
     }, name='transactions_app')
 
 
-# JUST ONE BORED APES EXAMPLE FOR NOW BUT CAN MAKE THIS SECTION TRAVERSABLE LATER
+def prep_individual_collection_data(address, collection_name, next_collection_name):
+    ref = db.reference('/', app=tokens_app)
+    if next_collection_name == None:
+        return
+        collection_tokens = ref.order_by_key().start_at(collection_name).get()
+    else:
+        collection_tokens = ref.order_by_key().start_at(collection_name).end_at(next_collection_name).get()
+    ref = db.reference('/', app=transactions_app)
+    collection_trans = ref.order_by_child('contracthash').equal_to(address).limit_to_first(50).get()
+    # print(collection_tokens)
+    collection = Collection(collection_tokens, collection_trans)
+    collection.prep_data()
+    return collection
+    
+def prep_all_collection_data(list_of_names, collection_address_dict):
+    list_length = len(list_of_names)
+    collection_list = [] 
+    for i, name in enumerate(list_of_names):
+        address = collection_address_dict[name]
+        if (i == list_length - 1):
+            collection = prep_individual_collection_data(address, name, None)    
+        else:
+            collection = prep_individual_collection_data(address, name, list_of_names[i+1])
+        collection_list.append(collection)
+    return collection_list
 
-ref = db.reference('/', app=tokens_app)
-bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
-ref = db.reference('/', app=transactions_app)
-bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
-# # # cryptopunks = ref.order_by_child('contracthash').equal_to(cryptoPunkMDAddress).limit_to_first(5).get()
-# # print(cryptopunks)
-# bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(5000).get()
-bored_apes = Collection(bored_apes_data, bored_apes_trans)
-bored_apes.prep_data()
+def reduce_df_most_recent(collection_df):
+    # order by timestamp
+    print(collection_df)
+    sorted_df = collection_df.sort_values('timestamp', axis = 1, ascending = False)
+    uniq_sorted_df = sorted_df.drop_duplicates(subset = "tokenid", keep = "first")
+    # per collection return dataframe
+    print(uniq_sorted_df)
+    return uniq_sorted_df
 
-# prepped_df = pd.read_pickle("apes_prepped_df.pkl")
-preprocessed_df = pd.read_pickle("apes_preprocessed_df.pkl")
+
+
+# cool_cats = prep_individual_collection_data(coolCatsAddress, "coolcat", "cryptoad")
+# print(cool_cats.prepped_df)
+collection_list = prep_all_collection_data(list_of_names, collection_name_dict)
+reduce_df_most_recent(collection_list[4].preprocessed_df)
+# print(collection_list[0].prepped_df)
+# print(collection_list[4].preprocessed_df)
+
+
+
+
+
+
+
+
+
+
+# preprocessed_df = pd.read_pickle("apes_preprocessed_df.pkl")
 # print(preprocessed_df)
 # preprocess(prepped_df)
 
-x = preprocessed_df.drop(['ethprice'], axis=1)
-y = preprocessed_df['ethprice']
-print(x)
-print(y)
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=False)
+# x = preprocessed_df.drop(['ethprice'], axis=1)
+# y = preprocessed_df['ethprice']
+# print(x)
+# print(y)
+# x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=False)
 
-y_pred, y_test = random_forest_reg(x_train, x_test, y_train, y_test)
-analyse_results(y_pred, y_test, 'BoredApes')
+# y_pred, y_test = random_forest_reg(x_train, x_test, y_train, y_test)
+# analyse_results(y_pred, y_test, 'BoredApes')
 
 
 # testable_data = prepped_df.drop([''])
@@ -85,3 +133,17 @@ analyse_results(y_pred, y_test, 'BoredApes')
 # count_dict = dict((id, 0) for id in list(bored_apes.tokens_df['tokenID']))
 # print(count_dict)
 
+# def get_prepped_data(collection_name):
+#     cred_pull_tokens_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_all_tokens_store.json'
+# cred_pull_tokens = firebase_admin.credentials.Certificate(cred_pull_tokens_key)
+# tokens_app = firebase_admin.initialize_app(cred_pull_tokens, {
+#     'databaseURL':'https://alltokens-8ff48-default-rtdb.europe-west1.firebasedatabase.app/'
+#     }, name = 'tokens_app')
+
+# # CREATE LINK FOR 'ALL TRANSACTIONS' DATABASE
+
+# cred_pull_transactions_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_all_transactions_store.json'
+# cred_pull_transactions = firebase_admin.credentials.Certificate(cred_pull_transactions_key)
+# transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
+#     'databaseURL':'https://allcollections-6e66c-default-rtdb.europe-west1.firebasedatabase.app/'
+#     }, name='transactions_app')

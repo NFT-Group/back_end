@@ -46,12 +46,12 @@ class Collection:
             left_on='tokenID', 
             right_on='tokenid', 
             how='inner')
-        print(self.prepped_df)
+        # print(self.prepped_df)
 
         # preprocess said megaframe for ML goodness
         # the goodness will be inputted into self.preprocessed_df
         self.preprocess()
-        print(self.preprocessed_df)
+        # print(self.preprocessed_df)
 
         self.preprocessed_df.to_pickle("apes_preprocessed_df.pkl")
 
@@ -67,11 +67,14 @@ class Collection:
 
         for id, meta in self.og_token_data.items():
             id_temp = json.dumps(meta["tokenid"])
-            self.token_id_list.append(id_temp)
             metadata_temp = json.dumps(meta["metadata"])
             metadata_temp = metadata_temp.replace("\\","")[1:-1]
             metadata_temp = json.loads(metadata_temp)
-            metadata_temp = json.dumps(metadata_temp["attributes"])
+            try:
+                metadata_temp = json.dumps(metadata_temp["attributes"])
+            except KeyError:
+                continue
+            self.token_id_list.append(id_temp)
             self.metadata_list.append(metadata_temp)  
 
         # self.token_id_list = token_id_list
@@ -82,7 +85,6 @@ class Collection:
         # list of headers and a list of all the raw data without headers
 
         data_list = []
-
         for id, other_data in self.og_trans_data.items():
             transaction_hash = json.dumps(id)
             data_temp = json.loads(json.dumps(other_data))
@@ -153,7 +155,11 @@ class Collection:
                 if ((j % 4) == 1): 
                     for k in range(len(unique_header_list)):
                         if(unique_header_list[k] == traitList[i][j]):
-                            trait_values_np[i,k] = str(traitList[i][j+2])
+                            try:
+                                trait_values_np[i,k] = str(traitList[i][j+2])
+                            except:
+                                trait_values_np[i,k] = "1"
+
                             
         # get counts of how many traits each nft has
         number_of_traits = np.zeros([len(trait_values_np),1])
@@ -303,21 +309,23 @@ class Collection:
             lambda x: x.total_seconds())
 
         # NORMALISE DATA WHICH NEEDS NORMALISING
-        for column in self.preprocessed_df:
-            self.preprocessed_df[column] = self._normalise(
-                self.preprocessed_df[column].astype(float))
+        # for column in self.preprocessed_df:
+        #     self.preprocessed_df[column] = self._normalise(
+        #         self.preprocessed_df[column].astype(float))
         
 
         # self.preprocessed_df.running_sell_count = self._normalise(
         #     self.preprocessed_df.running_sell_count.astype(float))
         # self.preprocessed_df.running_whale_weight = self._normalise(
         #     self.preprocessed_df.running_whale_weight.astype(float))
-        # self.preprocessed_df.timestamp = self._normalise(
-        #     self.preprocessed_df.timestamp.astype(float))
+        self.preprocessed_df.timestamp = self._normalise(
+            self.preprocessed_df.timestamp.astype(float))
 
     def _normalise(self, column):
-        normal_col = (column - column.min()) / (column.max() - column.min())
+        if column.min() == column.max():
+            normal_col = column/column.max()
+        else:
+            normal_col = (column - column.min()) / (column.max() - column.min())
         return normal_col  
 
-    def find_the_wailords(self):
-        
+       
