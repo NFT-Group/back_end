@@ -42,7 +42,10 @@ class Collection:
         self.tokens_df = self.tokens_df.astype({'tokenID': 'int64'})
         self.transactions_df = self.transactions_df.astype({'tokenid':'int64'})
         self.prepped_df = self.tokens_df.merge(
-            self.transactions_df, left_on='tokenID', right_on='tokenid', how='inner')
+            self.transactions_df,
+            left_on='tokenID', 
+            right_on='tokenid', 
+            how='inner')
         print(self.prepped_df)
 
         # preprocess said megaframe for ML goodness
@@ -50,7 +53,7 @@ class Collection:
         self.preprocess()
         print(self.preprocessed_df)
 
-        self.prepped_df.to_pickle("apes_preprocessed_df.pkl")
+        self.preprocessed_df.to_pickle("apes_preprocessed_df.pkl")
 
         # self.transactions_df.to_pickle("transactions_df.pkl")
         # self.tokens_df.to_pickle("tokens_df.pkl")
@@ -143,7 +146,8 @@ class Collection:
 
         # create trait values which will create a numpy array of all the trait values
         # for the correct header e.g. 'gold hoop' within 'earing' header
-        trait_values_np = np.empty([len(traitList),len(unique_header_list)], dtype=object)
+        trait_values_np = np.empty([
+            len(traitList),len(unique_header_list)], dtype=object)
         for i in range(len(traitList)):
             for j in range(len(traitList[i])):
                 if ((j % 4) == 1): 
@@ -180,12 +184,15 @@ class Collection:
 
         # sandwiches the list of trait distributions with the NFT IDs in column[0] 
         # and the number of traits in the final column
-        trait_values_count_np = np.column_stack((self.id_list_np[:,0], trait_values_count_np))
-        trait_values_count_np = np.column_stack((trait_values_count_np, trait_frequency_per_nft))
+        trait_values_count_np = np.column_stack((
+            self.id_list_np[:,0], trait_values_count_np))
+        trait_values_count_np = np.column_stack((
+            trait_values_count_np, trait_frequency_per_nft))
         # print(trait_values_count_np)
 
         # change count to % so we normalise the data for varying collection sizes
-        trait_values_count_np[:,1:] = trait_values_count_np[:,1:].astype(float)/len(trait_values_count_np)
+        trait_values_count_np[:,1:] = trait_values_count_np[:,1:].astype(
+            float)/len(trait_values_count_np)
         trait_values_distribution = trait_values_count_np
         # print(trait_values_distribution
         # print(trait_values_distribution)
@@ -271,17 +278,17 @@ class Collection:
 
     def preprocess(self):
 
-        # REMOVED ROWS WHICH HAVE GARABAGE VALUES
+        # REMOVED ROWS WHICH HAVE GARBAGE VALUES
         self.preprocessed_df = self.prepped_df[
             self.prepped_df.fromaddress != '0x0000000000000000000000000000000000000000']
         self.preprocessed_df = self.preprocessed_df[
-            self.preprocessed_df.ethprice != '0.00']
+            self.preprocessed_df.ethprice != 0]
 
-        # REMOVE COLUMNS WHICH WON'T BE USED
+        # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
         self.preprocessed_df = self.preprocessed_df.drop([
             'tokenid',
             'fromaddress', 
-            'toaddress', 
+            'toaddress',
             'tokenuri',
             'transactionhash',
             'blocknumber',
@@ -296,15 +303,17 @@ class Collection:
             lambda x: x.total_seconds())
 
         # NORMALISE DATA WHICH NEEDS NORMALISING
-        self.preprocessed_df.running_sell_count = self._normalise(
-            self.preprocessed_df.running_sell_count.astype(float))
-        self.preprocessed_df.running_whale_weight = self._normalise(
-            self.preprocessed_df.running_whale_weight.astype(float))
-        self.preprocessed_df.timestamp = self._normalise(
-            self.preprocessed_df.timestamp.astype(float))
+        for column in self.preprocessed_df:
+            self.preprocessed_df[column] = self._normalise(
+                self.preprocessed_df[column].astype(float))
+        
 
-        print(self.preprocessed_df)
-        # RETURN
+        # self.preprocessed_df.running_sell_count = self._normalise(
+        #     self.preprocessed_df.running_sell_count.astype(float))
+        # self.preprocessed_df.running_whale_weight = self._normalise(
+        #     self.preprocessed_df.running_whale_weight.astype(float))
+        # self.preprocessed_df.timestamp = self._normalise(
+        #     self.preprocessed_df.timestamp.astype(float))
 
     def _normalise(self, column):
         normal_col = (column - column.min()) / (column.max() - column.min())

@@ -8,6 +8,8 @@ import pandas as pd
 from collection_class import Collection
 from preprocess import preprocess
 from sklearn.model_selection import train_test_split
+from analysis import analyse_results
+from ML_Models import random_forest_reg
 
 
 apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
@@ -52,25 +54,30 @@ transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
 
 # JUST ONE BORED APES EXAMPLE FOR NOW BUT CAN MAKE THIS SECTION TRAVERSABLE LATER
 
-# ref = db.reference('/', app=tokens_app)
-# bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
-# ref = db.reference('/', app=transactions_app)
-# bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
+ref = db.reference('/', app=tokens_app)
+bored_apes_data = ref.order_by_key().start_at('boredape').end_at('boredapekennel').get()
+ref = db.reference('/', app=transactions_app)
+bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
 # # # cryptopunks = ref.order_by_child('contracthash').equal_to(cryptoPunkMDAddress).limit_to_first(5).get()
-# # # print(cryptopunks)
-# # # bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(5000).get()
-# bored_apes = Collection(bored_apes_data, bored_apes_trans)
-# bored_apes.prep_data()
-# print(bored_apes.prepped_df)
-# bored_apes.prepped_df.to_json()
+# # print(cryptopunks)
+# bored_apes_trans = ref.order_by_child('contracthash').equal_to(apeAddress).limit_to_first(5000).get()
+bored_apes = Collection(bored_apes_data, bored_apes_trans)
+bored_apes.prep_data()
 
 # prepped_df = pd.read_pickle("apes_prepped_df.pkl")
 preprocessed_df = pd.read_pickle("apes_preprocessed_df.pkl")
+# print(preprocessed_df)
 # preprocess(prepped_df)
 
-# x = 
+x = preprocessed_df.drop(['ethprice'], axis=1)
+y = preprocessed_df['ethprice']
+print(x)
+print(y)
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=False)
 
-x_train, x_test, y_train, y_test = train_test_split()
+y_pred, y_test = random_forest_reg(x_train, x_test, y_train, y_test)
+analyse_results(y_pred, y_test, 'BoredApes')
+
 
 # testable_data = prepped_df.drop([''])
 

@@ -296,6 +296,7 @@ def elastic_net(x_train, x_test, y_train, y_test):
 
 
 def random_forest_reg(x_train, x_test, y_train, y_test):
+        print("WHAT")
         train_error=[]
         test_error=[]
         minDepth=20
@@ -316,6 +317,7 @@ def random_forest_reg(x_train, x_test, y_train, y_test):
         # plotdata.plot()
         # x_test.size
         y_pred = regr.predict(x_test)
+        print("HWTA")
         return(y_pred, y_test)
         # # compare y_pred vs y_test
         # y_test_vs_pred = np.zeros((len(y_test),2))
