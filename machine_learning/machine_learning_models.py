@@ -217,36 +217,6 @@ def neural_networks(x_train, x_test, y_train, y_test):
         y_pred = MLP.predict(x_test)
         return(y_pred, y_test)
 
-        # # compare y_pred vs y_test
-        # y_test_vs_pred = np.zeros((len(y_test),2))
-        # y_test_vs_pred[:, 0] = y_test
-        # y_test_vs_pred[:, 1] = y_pred
-        # print("Actual vs prediction ")
-        # print(y_test_vs_pred)
-
-        # # testSet = pd.concat([X_test, y_test], axis = 1)
-
-        # # datasetPredict = pd.concat([testSet.reset_index(), pd.Series(y_pred, name = 'PredictedGenPrice')], axis = 1).round(2)
-        
-        # # datasetPredict.corr()
-        # print("Training set accuracy = " + str(MLP.score(x_train, y_train)))
-        # print("Test set accuracy = " + str(MLP.score(x_test, y_test)))
-
-        # #MSE
-        # from sklearn import metrics
-        # print('MSE:', metrics.mean_squared_error(y_test, y_pred))
-
-        # #MAPE
-        # def mean_absolute_percentage_error(y_test, y_pred):
-        #         y_test = y_test.astype('float')
-        #         print(y_test)
-        #         y_pred = y_pred.astype('float')
-        #         y_test, y_pred = np.array(y_test), np.array(y_pred)
-        #         return np.mean(np.abs((y_test - y_pred)/y_test)) * 100
-
-        # print('MAPE:', mean_absolute_percentage_error(y_test, y_pred))
-
-
 # @ignore_warnings(category=ConvergenceWarning)
 
 def elastic_net(x_train, x_test, y_train, y_test):
