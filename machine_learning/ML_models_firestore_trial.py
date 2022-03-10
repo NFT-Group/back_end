@@ -74,35 +74,67 @@ def prep_individual_collection_data(address, collection_name, next_collection_na
     collection.prep_data()
     return collection
     
+
 def prep_all_collection_data(list_of_names, collection_address_dict):
     list_length = len(list_of_names)
-    collection_list = [] 
+    collection_dict = {}
     for i, name in enumerate(list_of_names):
         address = collection_address_dict[name]
         if (i == list_length - 1):
             collection = prep_individual_collection_data(address, name, None)    
         else:
             collection = prep_individual_collection_data(address, name, list_of_names[i+1])
-        collection_list.append(collection)
-    return collection_list
+        collection_dict.update({name: collection})
+    return collection_dict
+
 
 def reduce_df_most_recent(collection_df):
     # order by timestamp
-    print(collection_df)
-    sorted_df = collection_df.sort_values('timestamp', axis = 1, ascending = False)
-    uniq_sorted_df = sorted_df.drop_duplicates(subset = "tokenid", keep = "first")
-    # per collection return dataframe
-    print(uniq_sorted_df)
+    sorted_df = collection_df.sort_values('timestamp', ascending = True)
+    uniq_sorted_df = sorted_df.drop_duplicates(subset=['tokenID'], keep='first')
     return uniq_sorted_df
 
+def reduce_all_df_most_recent(collection_dict):
+    unique_sorted_dicts = {}
+    for name, collection in collection_dict.items():
+        uniq_sorted_df = reduce_all_df_most_recent(collection)
+        unique_sorted_dicts.update({name: uniq_sorted_df})
+    return unique_sorted_dicts
+
+def set_data_to_firebase(name, collection_df):
+    ref = db.reference('/')
+    for row in range(len(collection_df)):
+        tokenID = str(collection_df[row]['tokenID'])
+        print(tokenID)
+        ref.child(name).child(tokenID).set(collection_df[row])
+        ref.child(name).set('4')
+        # ref.child(name).child(tokenID).set(collection_df[row])
+    # collection_df.apply(ref.child(name).set(), axis=1)
+
+def set_all_data_to_firebase(collections_dict):
+    for name, collection in collection_dict.items():
+        set_data_to_firebase(name, collection)
+
+    
+
+collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
+print(reduce_df_most_recent(collection_dict['cryptoad'].preprocessed_df))
+unique_sorted_cryptoad = reduce_df_most_recent(collection_dict['cryptoad'].preprocessed_df)
+# print(unique_sorted_cryptoad.to_json())
+
+print(unique_sorted_cryptoad)
+trial_json = unique_sorted_cryptoad.to_json(orient='records')
+parsed_trial = json.loads(trial_json)
 
 
-# cool_cats = prep_individual_collection_data(coolCatsAddress, "coolcat", "cryptoad")
-# print(cool_cats.prepped_df)
-collection_list = prep_all_collection_data(list_of_names, collection_name_dict)
-reduce_df_most_recent(collection_list[4].preprocessed_df)
-# print(collection_list[0].prepped_df)
-# print(collection_list[4].preprocessed_df)
+
+print(parsed_trial)
+
+
+
+set_data_to_firebase('cryptoad', parsed_trial)
+
+
 
 
 
