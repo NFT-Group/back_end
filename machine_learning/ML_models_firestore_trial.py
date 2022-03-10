@@ -10,6 +10,7 @@ from preprocess import preprocess
 from sklearn.model_selection import train_test_split
 from analysis import analyse_results
 from ML_Models import random_forest_reg
+import pickle
 
 
 apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
@@ -37,10 +38,10 @@ collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennel
 
 # CREATE LINK FOR 'FULL DATABASE'
 
-cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_full_database_store.json'
+cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
 cred_push = firebase_admin.credentials.Certificate(cred_push_key)
 default_app = firebase_admin.initialize_app(cred_push, {
-    'databaseURL':'https://full-database-9c028-default-rtdb.europe-west1.firebasedatabase.app/'
+    'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
     })
 
 # CREATE LINK FOR 'ALL TOKENS' DATABASE
@@ -68,10 +69,12 @@ def prep_individual_collection_data(address, collection_name, next_collection_na
     else:
         collection_tokens = ref.order_by_key().start_at(collection_name).end_at(next_collection_name).get()
     ref = db.reference('/', app=transactions_app)
-    collection_trans = ref.order_by_child('contracthash').equal_to(address).limit_to_first(50).get()
+    collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
     # print(collection_tokens)
     collection = Collection(collection_tokens, collection_trans)
     collection.prep_data()
+    if collection_name == 'cryptoad':
+        collection.preprocessed_df = collection.preprocessed_df.drop('# Traits', 1)
     return collection
     
 
@@ -94,69 +97,86 @@ def reduce_df_most_recent(collection_df):
     uniq_sorted_df = sorted_df.drop_duplicates(subset=['tokenID'], keep='first')
     return uniq_sorted_df
 
+
 def reduce_all_df_most_recent(collection_dict):
     unique_sorted_dicts = {}
     for name, collection in collection_dict.items():
-        uniq_sorted_df = reduce_all_df_most_recent(collection)
+        if name == 'punk':
+            continue
+        uniq_sorted_df = reduce_df_most_recent(collection.preprocessed_df)
         unique_sorted_dicts.update({name: uniq_sorted_df})
     return unique_sorted_dicts
 
+
 def set_data_to_firebase(name, collection_df):
+    collection_df.insert(0, 'NameOfCollection', name)
+    trial_json = collection_df.to_json(orient='records')
+    parsed_trial = json.loads(trial_json)
     ref = db.reference('/')
-    for row in range(len(collection_df)):
-        tokenID = str(collection_df[row]['tokenID'])
-        print(tokenID)
-        ref.child(name).child(tokenID).set(collection_df[row])
-        ref.child(name).set('4')
-        # ref.child(name).child(tokenID).set(collection_df[row])
-    # collection_df.apply(ref.child(name).set(), axis=1)
+    for row in range(len(parsed_trial)):
+        hash = name + str(parsed_trial[row]['tokenID'])
+        ref.child(hash).set(parsed_trial[row])
+
 
 def set_all_data_to_firebase(collections_dict):
-    for name, collection in collection_dict.items():
+    for name, collection in collections_dict.items():
         set_data_to_firebase(name, collection)
-
     
 
-collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
-print(reduce_df_most_recent(collection_dict['cryptoad'].preprocessed_df))
-unique_sorted_cryptoad = reduce_df_most_recent(collection_dict['cryptoad'].preprocessed_df)
-# print(unique_sorted_cryptoad.to_json())
+# collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
+# print(collection_dict)
+# unique_sorted_dicts = reduce_all_df_most_recent(collection_dict)
+# set_all_data_to_firebase(unique_sorted_dicts)
 
-print(unique_sorted_cryptoad)
-trial_json = unique_sorted_cryptoad.to_json(orient='records')
-parsed_trial = json.loads(trial_json)
-
+# bored_apes = prep_individual_collection_data(apeAddress, 'boredape', 'boredapekennel')
+# preprocessed_df = bored_apes.preprocessed_df
 
 
-print(parsed_trial)
+preprocessed_df = pd.read_pickle("apes_preprocessed_df.pkl")
+x = preprocessed_df.drop(['ethprice'], axis=1)
+x = x.sort_index(axis=1, ascending=True)
+y = preprocessed_df['ethprice']
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=False)
+y_pred, y_test, model = random_forest_reg(x_train, x_test, y_train, y_test)
+print(x_train)
+analyse_results(y_pred, y_test, 'BoredApes')
+
+filename = "bored_apes_model.pkl"
+pickle.dump(model, open(filename, 'wb'))
+
+loaded_model = pickle.load(open(filename, 'rb'))
+y_pred = loaded_model.predict(x_test)
+analyse_results(y_pred, y_test, 'BoredApes')
+
+prediction = loaded_model.predict(x)
+
+ref = db.reference('boredape4372')
+data_for_input = ref.get()
+print(data_for_input)
+
+# data_for_input_json = pd.DataFrame.from_dict(data_for_input, orient="records")
+data_for_input_json = pd.DataFrame([data_for_input])
+
+data_for_input_json = data_for_input_json.drop(['NameOfCollection', 'ethprice'], axis=1)
+data_for_input_json['timestamp'] = 0
+print(data_for_input_json)
+
+price_prediction = loaded_model.predict(data_for_input_json)
+print(price_prediction)
 
 
 
-set_data_to_firebase('cryptoad', parsed_trial)
 
 
 
 
 
-
-
-
-
-
-
-
-# preprocessed_df = pd.read_pickle("apes_preprocessed_df.pkl")
 # print(preprocessed_df)
 # preprocess(prepped_df)
 
-# x = preprocessed_df.drop(['ethprice'], axis=1)
-# y = preprocessed_df['ethprice']
 # print(x)
 # print(y)
-# x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=False)
 
-# y_pred, y_test = random_forest_reg(x_train, x_test, y_train, y_test)
-# analyse_results(y_pred, y_test, 'BoredApes')
 
 
 # testable_data = prepped_df.drop([''])
