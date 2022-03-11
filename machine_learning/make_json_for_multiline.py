@@ -5,7 +5,7 @@ import pathlib
 import json
 import pandas as pd
 import time
-from datetime import datetime
+from datetime import date, datetime
 
 
 apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
@@ -65,7 +65,7 @@ def prep_all_collection_data(list_of_names, collection_address_dict):
 # # transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
 # #     'databaseURL':'https://allcollections-6e66c-default-rtdb.europe-west1.firebasedatabase.app/'
 # #     }, name='transactions_app')
-# weeks_transactions = ref.order_by_child('timestamp').start_at(one_week_ago).get()
+# weeks_transactions = ref.order_by_child('timestamp').start_at(one_year_ago).get()
 # transaction_keys = weeks_transactions.keys()
 # total_transaction_counts = [0, 0, 0, 0, 0, 0, 0, 0]
 # collection_names = ['Bored Ape Yacht Club', 'CryptoPunks', 'Bored Ape Kennel Club', 'Cool Cats', 'cloneX', 'CrypToadz', 'Doodles', 'Pudgy Penguins']
@@ -100,29 +100,65 @@ def prep_all_collection_data(list_of_names, collection_address_dict):
 
 # average price per day per collection
 
+one_year_ago = time.time() - 3.154e7 #number of seconds in a year
+one_year_ago = datetime.utcfromtimestamp(int(one_year_ago)).strftime('%Y-%m-%d')
+print(one_year_ago)
+
+
+
+def add_collection_col_for_mean_price_over_time(dates, collection_df, collection_name):
+
+    # delete first, redundant column
+    collection_df = collection_df.iloc[:,0:]
+
+    # get the last year's data
+    collection_df = collection_df.groupby('timestamp', as_index=False)['ethprice'].mean()
+    collection_df = collection_df.drop(collection_df[collection_df.timestamp < one_year_ago].index)
+    collection_df = collection_df.rename(columns={'ethprice': collection_name})
+    
+    # change data type to timestamp so we can compare
+    collection_df['timestamp'] = pd.to_datetime(collection_df['timestamp'], format='%Y-%m-%d')
+
+    dates = dates.merge(collection_df, on='timestamp', how='left')
+    dates = dates.fillna(method='ffill')
+    dates = dates.fillna(0)    
+    return dates
+
+
+
 ref = db.reference('/', app=transactions_app)
-collection_trans = ref.order_by_child('contracthash').equal_to(apeAddress).get()
-collection_df = pd.DataFrame.from_dict(collection_trans, orient="index")
-collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
-collection_df = collection_df[collection_df.ethprice != 0]
+dates = pd.DataFrame(pd.date_range(one_year_ago, freq="D", periods=365))
+dates = dates.rename(columns={0: 'timestamp'})
 
-# REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
-collection_df = collection_df.drop([
-    'tokenid',
-    'fromaddress', 
-    'toaddress',
-    'tokenuri',
-    'transactionhash',
-    'blocknumber',
-    'contracthash'
-    ], axis=1)
-collection_df = collection_df.drop(0, axis = 1)
-now = datetime.now()
-# collection_df.timestamp = pd.to_datetime(collection_df.timestamp)
-# collection_df.timestamp = now - collection_df.timestamp
-# collection_df.timestamp = collection_df.timestamp.apply(lambda x: x.total_seconds())
+for i, name in enumerate(list_of_names):
+    address = collection_name_dict[name]
+    collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
+    collection_df = pd.DataFrame.from_dict(collection_trans, orient="index")
+    collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
+    collection_df = collection_df[collection_df.ethprice != 0]
 
-print(collection_df)
+    # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
+    collection_df = collection_df.drop([
+        'tokenid',
+        'fromaddress', 
+        'toaddress',
+        'tokenuri',
+        'transactionhash',
+        'blocknumber',
+        'contracthash'
+        ], axis=1)
+    # collection_df.timestamp = pd.to_datetime(collection_df.timestamp)
+    # collection_df.timestamp = now - collection_df.timestamp
+    # collection_df.timestamp = collection_df.timestamp.apply(lambda x: x.total_seconds())
+    dates = add_collection_col_for_mean_price_over_time(dates, collection_df, name)
+
+print(dates)
+dates['timestamp'] = dates['timestamp'].dt.strftime("%Y-%m-%d")
+dates.to_json(r'multiline.json', orient='records')
+# with open("multiline.json", 'w') as outfile:
+#     json.dump(dates, outfile)
+print(dates)
+
 
 # transaction_keys = weeks_transactions.keys()
 
