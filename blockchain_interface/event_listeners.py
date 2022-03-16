@@ -247,9 +247,6 @@ if __name__ == '__main__':
     latest_firebase_block = latest_firebase_block[list(latest_firebase_block.keys())[0]]['blocknumber']
     print(latest_firebase_block)
 
-    while True:
-        a = latest_firebase_block
-
     latest_firebase_block += 1
 
     
@@ -257,6 +254,13 @@ if __name__ == '__main__':
     latest_block_number = block['number']
     print("old latest block")
     print(latest_block_number)
+
+    while (((latest_block_number - latest_firebase_block) % 10) != 0):
+        latest_firebase_block -= 1
+
+    print("new latest firebase block")
+    print(latest_firebase_block)
+
     ## scan from a to b for all 8 collections
     retrieve(cd.apeABI, cd.apeAddress, latest_firebase_block, latest_block_number, 10)
     retrieve(cd.boredApeKennelABI, cd.boredApeKennelAddress, latest_firebase_block, latest_block_number, 10)
