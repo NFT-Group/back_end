@@ -6,6 +6,9 @@ from ordered_set import OrderedSet
 import pandas as pd
 import re
 from trait_distribution import find_frequency_of_value
+from datetime import datetime
+import time
+import calendar
 
 class Collection:
 
@@ -14,27 +17,43 @@ class Collection:
         self.og_trans_data = og_trans_data
 
     def prep_data(self):
+
         # read in data from firebase into manageable formats
         self.split_data(self.og_token_data)
         self.get_raw_transaction_data(self.og_trans_data)
+
         # determine trait distribution
         self.trait_distribution()
         self.trait_header_list_mod = self.trait_header_list
         self.trait_header_list_mod.insert(0, 'tokenID')
         self.trait_header_list_mod.append('NumOfTraits')
+
+        # format a couple dataframes
         self.tokens_df = pd.DataFrame(
             self.trait_values_distribution, columns = self.trait_header_list_mod)
         self.transactions_df = pd.DataFrame(
             self.transactions_values, columns = self.transactions_keys)
+
+        # add derived information for ML
         self.add_sell_count()
         self.add_whale_distribution()
-
+        
+        # combine dataframes into one megaframe
         self.tokens_df = self.tokens_df.astype({'tokenID': 'int64'})
         self.transactions_df = self.transactions_df.astype({'tokenid':'int64'})
         self.prepped_df = self.tokens_df.merge(
-            self.transactions_df, left_on='tokenID', right_on='tokenid', how='inner')
-        # self.prepped_df.sort_values('timestamp', inplace = True)
-        print(self.prepped_df)
+            self.transactions_df,
+            left_on='tokenID', 
+            right_on='tokenid', 
+            how='inner')
+        # print(self.prepped_df)
+
+        # preprocess said megaframe for ML goodness
+        # the goodness will be inputted into self.preprocessed_df
+        self.preprocess()
+        # print(self.preprocessed_df)
+
+        self.preprocessed_df.to_pickle("apes_preprocessed_df.pkl")
 
         # self.transactions_df.to_pickle("transactions_df.pkl")
         # self.tokens_df.to_pickle("tokens_df.pkl")
@@ -48,11 +67,14 @@ class Collection:
 
         for id, meta in self.og_token_data.items():
             id_temp = json.dumps(meta["tokenid"])
-            self.token_id_list.append(id_temp)
             metadata_temp = json.dumps(meta["metadata"])
             metadata_temp = metadata_temp.replace("\\","")[1:-1]
             metadata_temp = json.loads(metadata_temp)
-            metadata_temp = json.dumps(metadata_temp["attributes"])
+            try:
+                metadata_temp = json.dumps(metadata_temp["attributes"])
+            except KeyError:
+                continue
+            self.token_id_list.append(id_temp)
             self.metadata_list.append(metadata_temp)  
 
         # self.token_id_list = token_id_list
@@ -63,7 +85,6 @@ class Collection:
         # list of headers and a list of all the raw data without headers
 
         data_list = []
-
         for id, other_data in self.og_trans_data.items():
             transaction_hash = json.dumps(id)
             data_temp = json.loads(json.dumps(other_data))
@@ -85,12 +106,12 @@ class Collection:
 
             self.transactions_id_list = self.transactions_df['tokenid'].tolist()
 
-            self.sell_count_array = np.zeros([len(self.transactions_id_list), 1])
+            self.sell_count_array = np.zeros([len(self.transactions_id_list)])
             for i in range(len(self.transactions_id_list)):
                 if(self.transactions_id_list[i] <= len(self.token_id_list)):
                     try:
                         self.count_dict[str(self.transactions_id_list[i])] += 1
-                        self.sell_count_array[i, 0] = self.count_dict[
+                        self.sell_count_array[i] = self.count_dict[
                             str(self.transactions_id_list[i])]
                     except KeyError:
                         continue
@@ -127,13 +148,18 @@ class Collection:
 
         # create trait values which will create a numpy array of all the trait values
         # for the correct header e.g. 'gold hoop' within 'earing' header
-        trait_values_np = np.empty([len(traitList),len(unique_header_list)], dtype=object)
+        trait_values_np = np.empty([
+            len(traitList),len(unique_header_list)], dtype=object)
         for i in range(len(traitList)):
             for j in range(len(traitList[i])):
                 if ((j % 4) == 1): 
                     for k in range(len(unique_header_list)):
                         if(unique_header_list[k] == traitList[i][j]):
-                            trait_values_np[i,k] = str(traitList[i][j+2])
+                            try:
+                                trait_values_np[i,k] = str(traitList[i][j+2])
+                            except:
+                                trait_values_np[i,k] = "1"
+
                             
         # get counts of how many traits each nft has
         number_of_traits = np.zeros([len(trait_values_np),1])
@@ -164,12 +190,15 @@ class Collection:
 
         # sandwiches the list of trait distributions with the NFT IDs in column[0] 
         # and the number of traits in the final column
-        trait_values_count_np = np.column_stack((self.id_list_np[:,0], trait_values_count_np))
-        trait_values_count_np = np.column_stack((trait_values_count_np, trait_frequency_per_nft))
+        trait_values_count_np = np.column_stack((
+            self.id_list_np[:,0], trait_values_count_np))
+        trait_values_count_np = np.column_stack((
+            trait_values_count_np, trait_frequency_per_nft))
         # print(trait_values_count_np)
 
         # change count to % so we normalise the data for varying collection sizes
-        trait_values_count_np[:,1:] = trait_values_count_np[:,1:].astype(float)/len(trait_values_count_np)
+        trait_values_count_np[:,1:] = trait_values_count_np[:,1:].astype(
+            float)/len(trait_values_count_np)
         trait_values_distribution = trait_values_count_np
         # print(trait_values_distribution
         # print(trait_values_distribution)
@@ -251,4 +280,52 @@ class Collection:
                 continue
 
         self.transactions_df = self.transactions_df.assign(
-            running_whale_weight = self.sell_count_array.tolist())     
+            running_whale_weight = self.sell_count_array.tolist())   
+
+    def preprocess(self):
+
+        # REMOVED ROWS WHICH HAVE GARBAGE VALUES
+        self.preprocessed_df = self.prepped_df[
+            self.prepped_df.fromaddress != '0x0000000000000000000000000000000000000000']
+        self.preprocessed_df = self.preprocessed_df[
+            self.preprocessed_df.ethprice != 0]
+
+        # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
+        self.preprocessed_df = self.preprocessed_df.drop([
+            'tokenid',
+            'fromaddress', 
+            'toaddress',
+            'tokenuri',
+            'transactionhash',
+            'blocknumber',
+            'contracthash'
+            ], axis=1)
+
+        now = datetime.now()
+        self.preprocessed_df.timestamp = pd.to_datetime(
+            self.preprocessed_df.timestamp)
+        self.preprocessed_df.timestamp = now - self.preprocessed_df.timestamp
+        self.preprocessed_df.timestamp = self.preprocessed_df.timestamp.apply(
+            lambda x: x.total_seconds())
+
+        # NORMALISE DATA WHICH NEEDS NORMALISING
+        # for column in self.preprocessed_df:
+        #     self.preprocessed_df[column] = self._normalise(
+        #         self.preprocessed_df[column].astype(float))
+        
+
+        # self.preprocessed_df.running_sell_count = self._normalise(
+        #     self.preprocessed_df.running_sell_count.astype(float))
+        # self.preprocessed_df.running_whale_weight = self._normalise(
+        #     self.preprocessed_df.running_whale_weight.astype(float))
+        self.preprocessed_df.timestamp = self._normalise(
+            self.preprocessed_df.timestamp.astype(float))
+
+    def _normalise(self, column):
+        if column.min() == column.max():
+            normal_col = column/column.max()
+        else:
+            normal_col = (column - column.min()) / (column.max() - column.min())
+        return normal_col  
+
+       

@@ -217,36 +217,6 @@ def neural_networks(x_train, x_test, y_train, y_test):
         y_pred = MLP.predict(x_test)
         return(y_pred, y_test)
 
-        # # compare y_pred vs y_test
-        # y_test_vs_pred = np.zeros((len(y_test),2))
-        # y_test_vs_pred[:, 0] = y_test
-        # y_test_vs_pred[:, 1] = y_pred
-        # print("Actual vs prediction ")
-        # print(y_test_vs_pred)
-
-        # # testSet = pd.concat([X_test, y_test], axis = 1)
-
-        # # datasetPredict = pd.concat([testSet.reset_index(), pd.Series(y_pred, name = 'PredictedGenPrice')], axis = 1).round(2)
-        
-        # # datasetPredict.corr()
-        # print("Training set accuracy = " + str(MLP.score(x_train, y_train)))
-        # print("Test set accuracy = " + str(MLP.score(x_test, y_test)))
-
-        # #MSE
-        # from sklearn import metrics
-        # print('MSE:', metrics.mean_squared_error(y_test, y_pred))
-
-        # #MAPE
-        # def mean_absolute_percentage_error(y_test, y_pred):
-        #         y_test = y_test.astype('float')
-        #         print(y_test)
-        #         y_pred = y_pred.astype('float')
-        #         y_test, y_pred = np.array(y_test), np.array(y_pred)
-        #         return np.mean(np.abs((y_test - y_pred)/y_test)) * 100
-
-        # print('MAPE:', mean_absolute_percentage_error(y_test, y_pred))
-
-
 # @ignore_warnings(category=ConvergenceWarning)
 
 def elastic_net(x_train, x_test, y_train, y_test):
@@ -301,14 +271,14 @@ def random_forest_reg(x_train, x_test, y_train, y_test):
         minDepth=20
         maxDepth=40
         models=[]
-        for depth in range(minDepth,maxDepth,5):
-                regr=RandomForestRegressor(max_depth=depth, random_state=0,n_estimators=5)
-                regr.fit(x_train, y_train)
-                models.append(regr)
-                tr_error=math.sqrt(mean_squared_error(regr.predict(x_train),y_train))
-                te_error=math.sqrt(mean_squared_error(regr.predict(x_test),y_test))
-                test_error.append(tr_error)
-                train_error.append(te_error)
+        regr=RandomForestRegressor(max_depth=max_depth, random_state=0,n_estimators=100)
+        regr.fit(x_train, y_train)
+        # for depth in range(minDepth,maxDepth,5):
+        #         models.append(regr)
+        #         tr_error=math.sqrt(mean_squared_error(regr.predict(x_train),y_train))
+        #         te_error=math.sqrt(mean_squared_error(regr.predict(x_test),y_test))
+        #         test_error.append(tr_error)
+        #         train_error.append(te_error)
                 # print (depth,tr_error,te_error)
         # train_plot=pd.DataFrame(train_error,index=range(20,40,5),columns=["test_Data"])
         # test_plot=pd.DataFrame(test_error,index=range(20,40,5),columns=["train_Data"])
@@ -316,7 +286,7 @@ def random_forest_reg(x_train, x_test, y_train, y_test):
         # plotdata.plot()
         # x_test.size
         y_pred = regr.predict(x_test)
-        return(y_pred, y_test)
+        return(y_pred, y_test, regr) 
         # # compare y_pred vs y_test
         # y_test_vs_pred = np.zeros((len(y_test),2))
         # y_test_vs_pred[:, 0] = y_test
