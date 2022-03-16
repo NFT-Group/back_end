@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 CORS(app)
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     response = ""
     with open("hello.txt") as file:
