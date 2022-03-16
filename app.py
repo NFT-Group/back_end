@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_cors import CORS
-import fs
 import sklearn
 import pandas
 
