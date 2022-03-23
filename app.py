@@ -4,9 +4,9 @@ import sklearn
 import pandas
 import pickle
 import firebase_admin
-# from firebase_admin import credentials, firestore, db
-# from pandas import DataFrame
-# from sklearn.ensemble import RandomForestRegressor
+from firebase_admin import credentials, firestore, db
+from pandas import DataFrame
+from sklearn.ensemble import RandomForestRegressor
 
 import pickle
 import os.path
