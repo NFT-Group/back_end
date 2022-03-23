@@ -13,8 +13,8 @@ CORS(app)
 @app.route("/", methods=["GET", "POST"])
 def index():
     response = ""
-    collection = json.loads(str(request.data))["collection"]
-    response += collection
+    # collection = json.loads(str(request.data))["collection"]
+    # response += collection
     with open("hello.txt") as file:
         for line in file:
             response += line
