@@ -18,8 +18,6 @@ CORS(app)
 @app.route("/", methods=["GET", "POST"])
 def index():
     response = ""
-    data = Flask.Request.get_data(as_text=True)
-    response += data
     with open("hello.txt") as file:
         for line in file:
             response += line
