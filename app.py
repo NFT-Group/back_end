@@ -23,7 +23,7 @@ def index():
             response += line
     response += ". "
     if (os.path.exists("boredape_model.pkl")):
-        response += "Bored ape model exists!"
+        response += "Bored ape model exists!2"
     else:
         response += "Bored ape model does NOT exist."
     return response
