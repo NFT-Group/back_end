@@ -41,7 +41,7 @@ def find_price_predictor_from_tokenid(request):
     tokenID = "1020"
 
     # find model
-    filename = "../node_graph_data/" + collection_name + "_model.pkl"
+    filename = collection_name + "_model.pkl"
 
     loaded_model = pickle.load(open(filename, 'rb'))
 
