@@ -3,21 +3,28 @@ from ML_models_functions import random_forest_reg
 from sklearn.model_selection import train_test_split
 from analysis import analyse_results
 import pickle
+import pathlib
 
-
+list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
 
 collection_dict = retrieve_all_pickles_into_dict()
-bored_apes = collection_dict['boredape']
-preprocessed_df = bored_apes.preprocessed_df
 
-x = preprocessed_df.drop(['ethprice'], axis=1)
-x = x.sort_index(axis=1, ascending=True) # IMPORTANT LINE OF CODE TO ENSURE LINEUP
-y = preprocessed_df['ethprice']
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=False)
-y_pred, y_test, model = random_forest_reg(x_train, x_test, y_train, y_test)
-analyse_results(y_pred, y_test, 'boredape')
+for name in list_of_names:
 
-with 
+    collection = collection_dict[name]
+    preprocessed_df = collection.preprocessed_df
+
+    x = preprocessed_df.drop(['ethprice'], axis=1)
+    x = x.sort_index(axis=1, ascending=True) # IMPORTANT LINE OF CODE TO ENSURE LINEUP
+    y = preprocessed_df['ethprice']
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=True)
+    y_pred, y_test, model = random_forest_reg(x_train, x_test, y_train, y_test)
+    analyse_results(y_pred, y_test, name)
+
+    with open(str(pathlib.Path(__file__).parent.resolve()) + '/ML_models/random_forests/' + 
+        name + '_RF.pkl', 'wb') as handle:
+            pickle.dump(model, handle)
+
 
 # filename = "bored_apes_model.pkl"
 # pickle.dump(model, open(filename, 'wb'))

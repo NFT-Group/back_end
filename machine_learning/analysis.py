@@ -7,6 +7,7 @@ def analyse_results(y_pred, y_test, name):
         #         list(collection_addresses_dict.keys())[list(collection_addresses_dict.values()).index(name)]
         #         + "----------\n\n")
 
+        print('Collection: ' + name)
         print('MSE:', metrics.mean_squared_error(y_test, y_pred))
 
         #MAPE
