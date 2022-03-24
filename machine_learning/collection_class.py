@@ -37,6 +37,9 @@ class Collection:
         # add derived information for ML
         self.add_sell_count()
         self.add_whale_distribution()
+
+        # add list for whale analysis
+        self._create_list_of_top_whales()
         
         # combine dataframes into one megaframe
         self.tokens_df = self.tokens_df.astype({'tokenID': 'int64'})
@@ -47,6 +50,7 @@ class Collection:
             right_on='tokenid', 
             how='inner')
         # print(self.prepped_df)
+
 
         # preprocess said megaframe for ML goodness
         # the goodness will be inputted into self.preprocessed_df
@@ -226,16 +230,16 @@ class Collection:
                     break
 
 
-        frequency_of_sellers = find_frequency_of_value(unique_id_array[:,1])
+        # frequency_of_sellers = find_frequency_of_value(unique_id_array[:,1])
         frequency_of_buyers = find_frequency_of_value(unique_id_array[:,2])
-        frequency_of_purchases = find_frequency_of_value(unique_id_array[:,0])
+        # frequency_of_purchases = find_frequency_of_value(unique_id_array[:,0])
 
-        sorted_final_sellers = {k: v for k, v in sorted(
-            frequency_of_sellers.items(), key = lambda item: item[1])}
+        # sorted_final_sellers = {k: v for k, v in sorted(
+        #     frequency_of_sellers.items(), key = lambda item: item[1])}
         sorted_final_buyers = {k: v for k, v in sorted(
             frequency_of_buyers.items(), key = lambda item: item[1])}
-        sorted_final_purchases = {k: v for k, v in sorted(
-            frequency_of_purchases.items(), key = lambda item: item[1])}
+        # sorted_final_purchases = {k: v for k, v in sorted(
+        #     frequency_of_purchases.items(), key = lambda item: item[1])}
 
         ''' INTIIALISE THE FINAL DISTRIBUTION IN THE DICTIONARY FOR BUYERS
         AND SELLERS AND REVERSE ENGINEER THE INITIAL DISTRIBUTION WITH IT'''
@@ -281,6 +285,14 @@ class Collection:
 
         self.transactions_df = self.transactions_df.assign(
             running_whale_weight = self.sell_count_array.tolist())   
+
+    def _create_list_of_top_whales(self):
+        transactions = self.transactions_df
+        transactions.sort_values("running_whale_weight", ascending = False, inplace = True)
+        top_transactions = transactions['fromaddress'].unique()
+        top_transactions = top_transactions[
+            top_transactions != '0x0000000000000000000000000000000000000000']
+        self.whale_address_list = top_transactions[0:200]
 
     def preprocess(self):
 

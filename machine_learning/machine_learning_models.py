@@ -35,7 +35,7 @@ from add_real_usd_prices import add_real_usd_prices
 from trait_distribution import trait_distribution
 from match_trait_dis_values import match_trait_dis_values
 from whale_distributions import whale_distributions
-from clean_null_data import clean_null_data_transactions_data
+from NFTProject.back_end.machine_learning.archive_files.clean_null_data import clean_null_data_transactions_data
 
 from ordered_set import OrderedSet
 
