@@ -4,29 +4,18 @@ import pathlib
 import firebase_admin
 from firebase_admin import db
 
-cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
-cred_push = firebase_admin.credentials.Certificate(cred_push_key)
-default_app = firebase_admin.initialize_app(cred_push, {
-    'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
-    })
-
-
 def find_price_predictor_from_tokenid(request):
+    cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
     cred_push = firebase_admin.credentials.Certificate(cred_push_key)
-    try:
-        firebase_admin.delete_app(transactions_app)
-    except:
-        a = cred_push # dummy operation
-    try:
-        ml_app = firebase_admin.initialize_app(cred_push, { 'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/' } )
-    except:
-        a = cred_push # dummy operation
-    
+    default_app = firebase_admin.initialize_app(cred_push, {
+        'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
+        })
+
     # process request
     collection_name = request['collection']
     tokenID = request['tokenid']
 
-    # find model
+    # find model - THIS WILL LIKELY NEED TO BE CHANGED
     filename = "../node_graph_data/" + collection_name + "_model.pkl"
 
     loaded_model = pickle.load(open(filename, 'rb'))
@@ -43,8 +32,7 @@ def find_price_predictor_from_tokenid(request):
 
     predicted_price = loaded_model.predict(data_for_input_json)
 
-    firebase_admin.delete_app(ml_app) # there will DEFINITELY be a better way of doing this!!
-
+    firebase_admin.delete_app(default_app) # there will DEFINITELY be a better way of doing this!!
 
     return predicted_price
 
