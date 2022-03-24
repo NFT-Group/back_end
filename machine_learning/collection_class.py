@@ -292,15 +292,28 @@ class Collection:
 
         # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
         self.preprocessed_df = self.preprocessed_df.drop([
-            'tokenid',
             'fromaddress', 
             'toaddress',
             'tokenuri',
             'transactionhash',
             'blocknumber',
-            'contracthash'
+            'contracthash',
             ], axis=1)
 
+        # PREP AN ALTERNATIVE DATAFRAME WHICH WILL BE USED FOR RETRIEVING
+        # INSTANCES OF NFTS FROM THE WEBSITE FOR THE ML MODELS
+        temp_processed = self.preprocessed_df
+        for trait_name in self.trait_header_list:
+            temp_processed = temp_processed.drop([trait_name], axis=1)
+        self.price_predict_archive_df = self.tokens_df.merge(
+            temp_processed,
+            left_on='tokenID',
+            right_on='tokenid',
+            how='outer')
+        self.price_predict_archive_df = self.price_predict_archive_df.drop(
+                ['tokenid'], axis=1)
+    
+        self.preprocessed_df = self.preprocessed_df.drop(['tokenid'], axis=1)
         now = datetime.now()
         self.preprocessed_df.timestamp = pd.to_datetime(
             self.preprocessed_df.timestamp)
@@ -328,4 +341,4 @@ class Collection:
             normal_col = (column - column.min()) / (column.max() - column.min())
         return normal_col  
 
-       
+

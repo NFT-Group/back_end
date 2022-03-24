@@ -74,7 +74,7 @@ def prep_individual_collection_data(address, collection_name, next_collection_na
     collection = Collection(collection_tokens, collection_trans)
     collection.prep_data()
     if collection_name == 'cryptoad':
-        collection.preprocessed_df = collection.preprocessed_df.drop('# Traits', 1)
+        collection.price_predict_archive_df = collection.price_predict_archive_df.drop('# Traits', 1)
     return collection
     
 
@@ -103,7 +103,7 @@ def reduce_all_df_most_recent(collection_dict):
     for name, collection in collection_dict.items():
         if name == 'punk':
             continue
-        uniq_sorted_df = reduce_df_most_recent(collection.preprocessed_df)
+        uniq_sorted_df = reduce_df_most_recent(collection.price_predict_archive_df)
         unique_sorted_dicts.update({name: uniq_sorted_df})
     return unique_sorted_dicts
 
@@ -113,89 +113,61 @@ def set_data_to_firebase(name, collection_df):
     trial_json = collection_df.to_json(orient='records')
     parsed_trial = json.loads(trial_json)
     ref = db.reference('/')
+    count = 0
     for row in range(len(parsed_trial)):
         hash = name + str(parsed_trial[row]['tokenID'])
-        ref.child(hash).set(parsed_trial[row])
-
+        try:
+            ref.child(hash).set(parsed_trial[row])
+        except:
+            print(hash)
+            count = count + 1
+    print("Error count is ", count)
 
 def set_all_data_to_firebase(collections_dict):
     for name, collection in collections_dict.items():
         set_data_to_firebase(name, collection)
+
+
+# MAIN 
     
-
-# collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
-# print(collection_dict)
-# unique_sorted_dicts = reduce_all_df_most_recent(collection_dict)
-# set_all_data_to_firebase(unique_sorted_dicts)
-
-# bored_apes = prep_individual_collection_data(apeAddress, 'boredape', 'boredapekennel')
-# preprocessed_df = bored_apes.preprocessed_df
+collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
+unique_sorted_dicts = reduce_all_df_most_recent(collection_dict)
+set_all_data_to_firebase(unique_sorted_dicts)
 
 
-preprocessed_df = pd.read_pickle("apes_preprocessed_df.pkl")
-x = preprocessed_df.drop(['ethprice'], axis=1)
-x = x.sort_index(axis=1, ascending=True)
-y = preprocessed_df['ethprice']
-x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=False)
-y_pred, y_test, model = random_forest_reg(x_train, x_test, y_train, y_test)
-print(x_train)
-analyse_results(y_pred, y_test, 'BoredApes')
-
-filename = "bored_apes_model.pkl"
-pickle.dump(model, open(filename, 'wb'))
-
-loaded_model = pickle.load(open(filename, 'rb'))
-y_pred = loaded_model.predict(x_test)
-analyse_results(y_pred, y_test, 'BoredApes')
-
-prediction = loaded_model.predict(x)
-
-ref = db.reference('boredape4372')
-data_for_input = ref.get()
-print(data_for_input)
-
-# data_for_input_json = pd.DataFrame.from_dict(data_for_input, orient="records")
-data_for_input_json = pd.DataFrame([data_for_input])
-
-data_for_input_json = data_for_input_json.drop(['NameOfCollection', 'ethprice'], axis=1)
-data_for_input_json['timestamp'] = 0
-print(data_for_input_json)
-
-price_prediction = loaded_model.predict(data_for_input_json)
-print(price_prediction)
+# ML STUFF 
 
 
+# preprocessed_df = pd.read_pickle("apes_preprocessed_df.pkl")
+# x = preprocessed_df.drop(['ethprice'], axis=1)
+# x = x.sort_index(axis=1, ascending=True)
+# y = preprocessed_df['ethprice']
+# x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=False)
+# y_pred, y_test, model = random_forest_reg(x_train, x_test, y_train, y_test)
+# print(x_train)
+# analyse_results(y_pred, y_test, 'BoredApes')
+
+# filename = "bored_apes_model.pkl"
+# pickle.dump(model, open(filename, 'wb'))
+
+# loaded_model = pickle.load(open(filename, 'rb'))
+# y_pred = loaded_model.predict(x_test)
+# analyse_results(y_pred, y_test, 'BoredApes')
+
+# prediction = loaded_model.predict(x)
+
+# ref = db.reference('boredape4372')
+# data_for_input = ref.get()
+# print(data_for_input)
+
+# # data_for_input_json = pd.DataFrame.from_dict(data_for_input, orient="records")
+# data_for_input_json = pd.DataFrame([data_for_input])
+
+# data_for_input_json = data_for_input_json.drop(['NameOfCollection', 'ethprice'], axis=1)
+# data_for_input_json['timestamp'] = 0
+# print(data_for_input_json)
+
+# price_prediction = loaded_model.predict(data_for_input_json)
+# print(price_prediction)
 
 
-
-
-
-
-# print(preprocessed_df)
-# preprocess(prepped_df)
-
-# print(x)
-# print(y)
-
-
-
-# testable_data = prepped_df.drop([''])
-
-
-# count_dict = dict((id, 0) for id in list(bored_apes.tokens_df['tokenID']))
-# print(count_dict)
-
-# def get_prepped_data(collection_name):
-#     cred_pull_tokens_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_all_tokens_store.json'
-# cred_pull_tokens = firebase_admin.credentials.Certificate(cred_pull_tokens_key)
-# tokens_app = firebase_admin.initialize_app(cred_pull_tokens, {
-#     'databaseURL':'https://alltokens-8ff48-default-rtdb.europe-west1.firebasedatabase.app/'
-#     }, name = 'tokens_app')
-
-# # CREATE LINK FOR 'ALL TRANSACTIONS' DATABASE
-
-# cred_pull_transactions_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_all_transactions_store.json'
-# cred_pull_transactions = firebase_admin.credentials.Certificate(cred_pull_transactions_key)
-# transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
-#     'databaseURL':'https://allcollections-6e66c-default-rtdb.europe-west1.firebasedatabase.app/'
-#     }, name='transactions_app')
