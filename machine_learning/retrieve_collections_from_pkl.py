@@ -12,6 +12,3 @@ def retrieve_all_pickles_into_dict():
                 data = pickle.load(f)
                 collection_dict[name] = data
     return collection_dict
-
-collection_dict = retrieve_all_pickles_into_dict()
-print(collection_dict['boredape'].transactions_df)
