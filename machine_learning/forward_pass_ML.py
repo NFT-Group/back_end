@@ -16,7 +16,7 @@ def find_price_predictor_from_tokenid(request):
     tokenID = request['tokenid']
 
     # find model - THIS WILL LIKELY NEED TO BE CHANGED
-    filename = "../node_graph_data/" + collection_name + "_model.pkl"
+    filename = str(pathlib.Path(__file__).parent.resolve()) + '/ML_models/random_forests/' + collection_name + "_RF.pkl"
 
     loaded_model = pickle.load(open(filename, 'rb'))
 
@@ -27,7 +27,7 @@ def find_price_predictor_from_tokenid(request):
 
     # format input 
     data_for_input_json = DataFrame([data_for_input])
-    data_for_input_json = data_for_input_json.drop(['NameOfCollection', 'ethprice'], axis=1)
+    data_for_input_json = data_for_input_json.drop(['NameOfCollection', 'ethprice', 'tokenID'], axis=1)
     data_for_input_json['timestamp'] = 0
 
     predicted_price = loaded_model.predict(data_for_input_json)
@@ -36,3 +36,6 @@ def find_price_predictor_from_tokenid(request):
 
     return predicted_price
 
+request = {"collection":"boredape","tokenid":"333"}
+predicted_price = find_price_predictor_from_tokenid(request)
+print(predicted_price)

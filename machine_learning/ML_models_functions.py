@@ -9,7 +9,7 @@ def random_forest_reg(x_train, x_test, y_train, y_test):
         minDepth=20
         maxDepth=40
         models=[]
-        regr=RandomForestRegressor(max_depth=maxDepth, random_state=0,n_estimators=20)
+        regr=RandomForestRegressor(max_depth=maxDepth, random_state=0,n_estimators=32)
         regr.fit(x_train, y_train)
         # for depth in range(minDepth,maxDepth,5):
         #         models.append(regr)
