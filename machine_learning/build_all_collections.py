@@ -89,11 +89,6 @@ def prep_all_collection_data(list_of_names, collection_address_dict):
         collection_dict.update({name: collection})
     return collection_dict
 
-# cryptoad_class = prep_individual_collection_data(crypToadzAddress, 'cryptoad', 'doodle')
-# print(cryptoad_class.whale_address_list)
-# with open(str(pathlib.Path(__file__).parent.resolve()) + '/collections_pkl_folder/' + 'cryptoad' + '_collection_class.pkl', 'wb') as handle:
-            # pickle.dump(cryptoad_class, handle)
-
 collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
 
 for name, collection in collection_dict.items():
@@ -101,6 +96,6 @@ for name, collection in collection_dict.items():
         '/collections_pkl_folder/' + name +
         '_collection_class.pkl', 'wb') as handle:
             pickle.dump(collection, handle)
-    with open(str(pathlib.Path(__file__).parent.resolve()) + 
-        '/collections_pkl_folder/all_collections.pkl', 'wb') as handle:
-            pickle.dump(collection_dict, handle)
+    # with open(str(pathlib.Path(__file__).parent.resolve()) + 
+    #     '/collections_pkl_folder/all_collections.pkl', 'wb') as handle:
+    #         pickle.dump(collection_dict, handle)
