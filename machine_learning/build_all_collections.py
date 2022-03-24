@@ -6,10 +6,6 @@ import json
 import pathlib
 import pandas as pd
 from collection_class import Collection
-from preprocess import preprocess
-from sklearn.model_selection import train_test_split
-from analysis import analyse_results
-from ML_Models import random_forest_reg
 import pickle
 
 apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
@@ -23,11 +19,6 @@ cloneXAddress = '0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B'
 crypToadzAddress = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
 boredApeKennelAddress = '0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623'
 pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
-
-# collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodlesAddress,
-#         "coolCatsAddress": coolCatsAddress,
-#         "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
-#         "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
 
 #readd punks
 list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
@@ -96,6 +87,4 @@ for name, collection in collection_dict.items():
         '/collections_pkl_folder/' + name +
         '_collection_class.pkl', 'wb') as handle:
             pickle.dump(collection, handle)
-    # with open(str(pathlib.Path(__file__).parent.resolve()) + 
-    #     '/collections_pkl_folder/all_collections.pkl', 'wb') as handle:
-    #         pickle.dump(collection_dict, handle)
+
