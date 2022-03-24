@@ -154,6 +154,8 @@ for i, name in enumerate(list_of_names):
 
 print(dates)
 dates['timestamp'] = dates['timestamp'].dt.strftime("%Y-%m-%d")
+dates = dates.astype(str)
+print(dates)
 dates.to_json(r'multiline.json', orient='records')
 # with open("multiline.json", 'w') as outfile:
 #     json.dump(dates, outfile)

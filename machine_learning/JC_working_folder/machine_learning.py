@@ -139,7 +139,7 @@ print((y_test))
 results = pd.DataFrame(preds, columns = ["predicted"])
 results = results.values.tolist()
 y_test = y_test.values.tolist()
-results = results.
+results = results
 results = pd.concat([results, y_test], axis=1)
 print(results)
 

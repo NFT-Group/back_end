@@ -33,7 +33,7 @@ def find_price_predictor_from_tokenid():
     
     # process request
     collection_name = "boredape"
-    tokenID = "2304"
+    tokenID = "3749"
 
     # find model
     filename = collection_name + "_model.pkl"
