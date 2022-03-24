@@ -7,7 +7,7 @@ import json
 import pathlib
 import pandas as pd
 from collection_class import Collection
-from preprocess import preprocess
+from NFTProject.back_end.machine_learning.archive_files.preprocess import preprocess
 from sklearn.model_selection import train_test_split
 from analysis import analyse_results
 from ML_Models import random_forest_reg
@@ -53,7 +53,6 @@ def set_all_data_to_firebase(collections_dict):
 collection_dict = retrieve_all_pickles_into_dict()
 unique_sorted_dicts = reduce_all_df_most_recent(collection_dict)
 set_all_data_to_firebase(unique_sorted_dicts)
-
 
 # ML STUFF 
 
