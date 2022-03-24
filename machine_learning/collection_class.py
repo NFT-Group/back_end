@@ -20,47 +20,47 @@ class Collection:
 
         # read in data from firebase into manageable formats
         self.split_data(self.og_token_data)
-        # self.get_raw_transaction_data(self.og_trans_data)
+        self.get_raw_transaction_data(self.og_trans_data)
 
-        # # determine trait distribution
-        # self.trait_distribution()
-        # self.trait_header_list_mod = self.trait_header_list
-        # self.trait_header_list_mod.insert(0, 'tokenID')
-        # self.trait_header_list_mod.append('NumOfTraits')
+        # determine trait distribution
+        self.trait_distribution()
+        self.trait_header_list_mod = self.trait_header_list
+        self.trait_header_list_mod.insert(0, 'tokenID')
+        self.trait_header_list_mod.append('NumOfTraits')
 
-        # # format a couple dataframes
-        # self.tokens_df = pd.DataFrame(
-        #     self.trait_values_distribution, columns = self.trait_header_list_mod)
-        # self.transactions_df = pd.DataFrame(
-        #     self.transactions_values, columns = self.transactions_keys)
+        # format a couple dataframes
+        self.tokens_df = pd.DataFrame(
+            self.trait_values_distribution, columns = self.trait_header_list_mod)
+        self.transactions_df = pd.DataFrame(
+            self.transactions_values, columns = self.transactions_keys)
 
-        # # add derived information for ML
-        # self.add_sell_count()
-        # self.add_whale_distribution()
+        # add derived information for ML
+        self.add_sell_count()
+        self.add_whale_distribution()
 
-        # # add list for whale analysis
-        # self._create_list_of_top_whales()
+        # add list for whale analysis
+        self._create_list_of_top_whales()
         
-        # # combine dataframes into one megaframe
-        # self.tokens_df = self.tokens_df.astype({'tokenID': 'int64'})
-        # self.transactions_df = self.transactions_df.astype({'tokenid':'int64'})
-        # self.prepped_df = self.tokens_df.merge(
-        #     self.transactions_df,
-        #     left_on='tokenID', 
-        #     right_on='tokenid', 
-        #     how='inner')
-        # # print(self.prepped_df)
+        # combine dataframes into one megaframe
+        self.tokens_df = self.tokens_df.astype({'tokenID': 'int64'})
+        self.transactions_df = self.transactions_df.astype({'tokenid':'int64'})
+        self.prepped_df = self.tokens_df.merge(
+            self.transactions_df,
+            left_on='tokenID', 
+            right_on='tokenid', 
+            how='inner')
+        # print(self.prepped_df)
 
 
-        # # preprocess said megaframe for ML goodness
-        # # the goodness will be inputted into self.preprocessed_df
-        # self.preprocess()
-        # # print(self.preprocessed_df)
+        # preprocess said megaframe for ML goodness
+        # the goodness will be inputted into self.preprocessed_df
+        self.preprocess()
+        # print(self.preprocessed_df)
 
-        # self.preprocessed_df.to_pickle("apes_preprocessed_df.pkl")
+        self.preprocessed_df.to_pickle("apes_preprocessed_df.pkl")
 
-        # # self.transactions_df.to_pickle("transactions_df.pkl")
-        # # self.tokens_df.to_pickle("tokens_df.pkl")
+        # self.transactions_df.to_pickle("transactions_df.pkl")
+        # self.tokens_df.to_pickle("tokens_df.pkl")
 
 
     def split_data(self, og_token_data):
