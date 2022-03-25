@@ -121,7 +121,8 @@ def add_collection_col_for_mean_price_over_time(dates, collection_df, collection
 
     dates = dates.merge(collection_df, on='timestamp', how='left')
     dates = dates.fillna(method='ffill')
-    dates = dates.fillna(0)    
+    dates = dates.fillna(0)
+
     return dates
 
 

@@ -1,7 +1,8 @@
+from gc import collect
 import pickle
 from pandas import DataFrame
 import pathlib
-from NFTProject.back_end.machine_learning.retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
+from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict, retrieve_certain_collection
 import firebase_admin
 from firebase_admin import db
 
@@ -35,13 +36,17 @@ def find_price_predictor_from_tokenid(request):
 
     # firebase_admin.delete_app(default_app) # there will DEFINITELY be a better way of doing this!!
     
-    # THIS SHOULD WORK TOMORROW
-    # collection_dict = retrieve_all_pickles_into_dict()
-    # ipfs = collection_dict[collection_name].id_ipfs_dict[tokenID]
+    collection = retrieve_certain_collection(collection_name)
+    ipfs = collection.id_ipfs_dict[tokenID]
+    trait_list = collection.trait_list_dict[tokenID]
 
+    print(type(predicted_price))
+    # trait_list = collection_dict[collection_name].metadatalist
+    response = '{"price":' + str(predicted_price)
+    print(response)
 
-    return predicted_price
+    return predicted_price, ipfs, trait_list
 
 request = {"collection":"penguin","tokenid":"345"}
-predicted_price = find_price_predictor_from_tokenid(request)
-print(predicted_price)
+predicted_price, ipfs, trait_list = find_price_predictor_from_tokenid(request)
+print(predicted_price, ipfs, trait_list)
