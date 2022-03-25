@@ -1,5 +1,4 @@
 import numpy as np
-from trait_distribution import trait_distribution 
 import json
 from collections import OrderedDict 
 from ordered_set import OrderedSet
