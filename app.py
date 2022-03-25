@@ -55,6 +55,6 @@ def index():
     # collection_dict = retrieve_all_pickles_into_dict()
     # ipfs = collection_dict[collection_name].id_ipfs_dict[tokenID]
 
-    return str("We predict that NFT is worth ", str(predicted_price), " at this exact moment - wow!")
+    return ("We predict that NFT is worth " + str(predicted_price) + " at this exact moment - wow!")
     return str(predicted_price, ipfs, trait_list)
 
