@@ -85,6 +85,10 @@ def index():
         trait["rarity"] = specific_value
 
     predicted_price = np.array2string(*predicted_price)
+    if (ipfs[0:4] == "ipfs"):
+        ipfs = "https://ipfs.io/ipfs/" + ipfs[7:]
+
+
     response = '{"price":"' + predicted_price + '"},{"ipfs":' + ipfs + '},{"attributes":' + str(trait_list_json)
 
     # return ("We predict that NFT is worth " + predicted_price + "ETH at this exact moment - wow!")
