@@ -1,5 +1,13 @@
 import pandas as pd
 import pickle
+import os
+import sys
+import inspect
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir) 
+
 from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
 
 def whale_percentage_transactions(transactions_df, whale_list_df):
@@ -102,7 +110,7 @@ for name, collection in collection_dict.items():
     transactions_df = collection.transactions_df
     whale_list = collection.whale_address_list
     transaction_list = find_all_loops(whale_list)
-    with open('pkl_loop_dump/' + name + '_loops.pkl', 'wb') as fp:
+    with open('../pkl_loop_dump/' + name + '_loops.pkl', 'wb') as fp:
         pickle.dump(transaction_list, fp)
 
     print(transaction_list)
