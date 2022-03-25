@@ -12,3 +12,10 @@ def retrieve_all_pickles_into_dict():
                 data = pickle.load(f)
                 collection_dict[name] = data
     return collection_dict
+
+def retrieve_certain_collection(name):
+    with open(str(pathlib.Path(__file__).parent.resolve()) + 
+        '/collections_pkl_folder/' + name +
+        '_collection_class.pkl', 'rb') as f:
+           data = pickle.load(f)
+    return data
