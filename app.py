@@ -50,12 +50,12 @@ def index():
     predicted_price = loaded_model.predict(data_for_input_json)
 
     collection = retrieve_certain_collection(collection_name)
-    # ipfs = collection.id_ipfs_dict[tokenID]
-    # trait_list = collection.trait_list_dict[tokenID]
+    ipfs = collection.id_ipfs_dict[tokenID]
+    trait_list = collection.trait_list_dict[tokenID]
     # collection_dict = retrieve_all_pickles_into_dict()
     # ipfs = collection_dict[collection_name].id_ipfs_dict[tokenID]
-    predicted_price = str(predicted_price)
+    # predicted_price = str(predicted_price)
 
-    return ("We predict that NFT is worth " + predicted_price + "ETH at this exact moment - wow!")
+    # return ("We predict that NFT is worth " + predicted_price + "ETH at this exact moment - wow!")
     return str(predicted_price, ipfs, trait_list)
 
