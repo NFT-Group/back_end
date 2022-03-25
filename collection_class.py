@@ -84,8 +84,8 @@ class Collection:
             self.metadata_list.append(metadata_temp2)  
             self.ipfs_link_list.append(ipfs_temp)
 
-            self.trait_list_dict = dict(zip(self.token_id_list, self.metadata_list))
-            self.id_ipfs_dict = dict(zip(self.token_id_list, self.ipfs_link_list))
+        self.trait_list_dict = dict(zip(self.token_id_list, self.metadata_list))
+        self.id_ipfs_dict = dict(zip(self.token_id_list, self.ipfs_link_list))
 
 
     def get_raw_transaction_data(self, og_trans_data):
