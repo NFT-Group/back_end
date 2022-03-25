@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_cors import CORS
 import sklearn
-import pandas
+import pandas as pd
 import pickle
 import firebase_admin
 from firebase_admin import credentials, firestore, db
@@ -13,6 +13,8 @@ import pathlib
 import json
 import pickle
 import os.path
+import time
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -31,6 +33,8 @@ pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
 
 cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/machine_learning/database_store_keys/key_for_ML-prepped-database.json'
 cred_push = firebase_admin.credentials.Certificate(cred_push_key)
+cred_pull_transactions_key = str(pathlib.Path(__file__).parent.resolve()) + '/machine_learning/database_store_keys/key_for_all_transactions_store.json'
+cred_pull_transactions = firebase_admin.credentials.Certificate(cred_pull_transactions_key)
 try:
     default_app = firebase_admin.initialize_app(cred_push, {
         'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
@@ -39,13 +43,11 @@ except:
     a = cred_push
 
 try:
-    cred_pull_transactions_key = str(pathlib.Path(__file__).parent.resolve()) + '/machine_learning/database_store_keys/key_for_all_transactions_store.json'
-    cred_pull_transactions = firebase_admin.credentials.Certificate(cred_pull_transactions_key)
     transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
         'databaseURL':'https://allcollections-6e66c-default-rtdb.europe-west1.firebasedatabase.app/'
     }, name='transactions_app')
 except:
-    a = cred_pull
+    a = cred_pull_transactions
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -81,6 +83,7 @@ def index():
     return str(predicted_price, ipfs, trait_list)
 
 @app.route("/get_line_graph_data", methods=["GET", "POST"])
+def get_line_graph_data():
     data = request.data
     data = json.loads(data)
     timeframe = data['timeframe']
@@ -88,13 +91,13 @@ def index():
     list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
     collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress, "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress, "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
 
-    if (timeframe = 'day'):
+    if (timeframe == 'day'):
         timeframe = 86400
-    elif (timeframe = 'week'):
+    elif (timeframe == 'week'):
         timeframe = 604800
-    elif (timeframe = 'month'):
+    elif (timeframe == 'month'):
         timeframe = 2678400
-    elif (timeframe = 'year'):
+    elif (timeframe == 'year'):
         timeframe = 31556952
     
     start_time = time.time () - timeframe
