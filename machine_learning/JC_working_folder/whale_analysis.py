@@ -47,14 +47,18 @@ def find_all_loops(list_of_whales):
     dodgy_transactions_list = []
     for whale_address in list_of_whales:
         list_of_addresses_in_loop = []
+        list_of_addresses_in_loop.append(whale_address)
         find_all_buyers(whale_address, whale_address, list_of_addresses_in_loop, 0)
-        if(len(list_of_addresses_in_loop) != 0):
-            temp_df = pd.DataFrame(list_of_addresses_in_loop, columns = [whale_address])
+        if(len(list_of_addresses_in_loop) != 1):
+            # temp_df = pd.DataFrame(list_of_addresses_in_loop, columns = [whale_address])
+            dodgy_transactions_list.insert(0, whale_address)
             dodgy_transactions_list.append(list_of_addresses_in_loop)
+            print(len(dodgy_transactions_list))
             # print(list_of_addresses_in_loop)
     data_transposed = zip(dodgy_transactions_list)
-    df = pd.DataFrame(data_transposed, columns=list_of_whales)
-    return dodgy_transactions_list
+    df = pd.DataFrame(data_transposed)
+    print(df)
+    return df
 
 
 
@@ -73,6 +77,7 @@ def find_all_buyers(whale_address, target_address, list_of_addresses_in_loop, co
         return False
     for i in range(len(list_of_buyers)):
         if (list_of_buyers[i] == target_address):
+            list_of_addresses_in_loop.append("Another one")
             list_of_addresses_in_loop.append(whale_address)
             list_of_addresses_in_loop.append(list_of_transactions[i])
             found = True
@@ -88,7 +93,7 @@ def find_all_buyers(whale_address, target_address, list_of_addresses_in_loop, co
 transactions_df = pd.read_pickle("transactions_df.pkl")
 whale_list_df = pd.read_csv("whale_list_supreme.csv", names=["whale_list"], header = None)
 df = pd.DataFrame((find_all_loops(whale_list_df.whale_list.tolist())))
-print(df)
+# print(df)
 df.to_csv('list_of_looping_transactions.csv', index = False)
 # print(df)
 # find_all_buyers('0x5a418d8bc0c074a4a8fa88d1322dc51cc1cb9d29', '0x5a418d8bc0c074a4a8fa88d1322dc51cc1cb9d29', address_list, 0)
