@@ -1,4 +1,3 @@
-from NFTProject.back_end.machine_learning.retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
 from flask import Flask, request
 from flask_cors import CORS
 import sklearn
@@ -8,7 +7,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore, db
 from pandas import DataFrame
 from sklearn.ensemble import RandomForestRegressor
-from machine_learning.retrieve_all_pickles_into_dict import retrieve_all_pickles_into_dict
+from machine_learning.retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
 
 import pathlib
 import json
