@@ -77,11 +77,12 @@ def find_all_buyers(whale_address, target_address, list_of_addresses_in_loop, co
         return False
     for i in range(len(list_of_buyers)):
         if (list_of_buyers[i] == target_address):
-            list_of_addresses_in_loop.append("Another one")
+            list_of_addresses_in_loop.append("Another one1")
+            
             list_of_addresses_in_loop.append(whale_address)
             list_of_addresses_in_loop.append(list_of_transactions[i])
-            found = True
-        if(find_all_buyers(list_of_buyers[i], target_address, list_of_addresses_in_loop, count)):
+            return True
+        elif(find_all_buyers(list_of_buyers[i], target_address, list_of_addresses_in_loop, count)):
             list_of_addresses_in_loop.append(whale_address)
             list_of_addresses_in_loop.append(list_of_transactions[i])
             found = True
