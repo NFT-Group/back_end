@@ -57,7 +57,7 @@ class Collection:
         self.preprocess()
         # print(self.preprocessed_df)
 
-        self.preprocessed_df.to_pickle("apes_preprocessed_df.pkl")
+        # self.preprocessed_df.to_pickle("apes_preprocessed_df.pkl")
 
         # self.transactions_df.to_pickle("transactions_df.pkl")
         # self.tokens_df.to_pickle("tokens_df.pkl")
