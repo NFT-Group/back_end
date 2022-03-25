@@ -1,5 +1,6 @@
 import pandas as pd
 import pickle
+from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
 
 def whale_percentage_transactions(transactions_df, whale_list_df):
     
@@ -55,9 +56,9 @@ def find_all_loops(list_of_whales):
             dodgy_transactions_list.append(list_of_addresses_in_loop)
             print(len(dodgy_transactions_list))
             # print(list_of_addresses_in_loop)
-    print(dodgy_transactions_list)
+    # print(dodgy_transactions_list)
     flat_list = [item for sublist in dodgy_transactions_list for item in sublist]
-    print(flat_list)
+    # print(flat_list)
     # data_transposed = zip(dodgy_transactions_list)
     # df = pd.DataFrame(data_transposed)
     # print(df)
@@ -69,7 +70,7 @@ def find_all_loops(list_of_whales):
 # add seller address and whale address to the list of addresses 
 def find_all_buyers(whale_address, target_address, list_of_addresses_in_loop, count):
     count = count + 1
-    if(count > 2):
+    if(count > 3):
         return False
     list_of_buyers = (transactions_df.loc[transactions_df['fromaddress'] == whale_address, 'toaddress'])
     list_of_transactions = (transactions_df.loc[transactions_df['fromaddress'] == whale_address, 'transactionhash']).tolist()
@@ -93,17 +94,22 @@ def find_all_buyers(whale_address, target_address, list_of_addresses_in_loop, co
     return False
 
 
-transactions_df = pd.read_pickle("transactions_df.pkl")
-whale_list_df = pd.read_csv("whale_list_supreme.csv", names=["whale_list"], header = None)
-transaction_list = find_all_loops(whale_list_df.whale_list.tolist())
-with open('whale_loop_transaction_list', 'wb') as fp:
-    pickle.dump(transaction_list, fp)
+# transactions_df = pd.read_pickle("transactions_df.pkl")
+# whale_list_df = pd.read_csv("whale_list_supreme.csv", names=["whale_list"], header = None)
 
-print(transaction_list)
-with open ('whale_loop_transaction_list', 'rb') as fp:
-    transaction_list1 = pickle.load(fp)
+collection_dict = retrieve_all_pickles_into_dict()
+for name, collection in collection_dict.items():
+    transactions_df = collection.transactions_df
+    whale_list = collection.whale_address_list
+    transaction_list = find_all_loops(whale_list)
+    with open('pkl_loop_dump/' + name + '_loops.pkl', 'wb') as fp:
+        pickle.dump(transaction_list, fp)
 
-print(transaction_list1)
+    print(transaction_list)
+    # with open ('whale_loop_transaction_list', 'rb') as fp:
+    #     transaction_list1 = pickle.load(fp)
+
+    # print(transaction_list1)
 # df = pd.DataFrame((find_all_loops(whale_list_df.whale_list.tolist())))
 # print(df)
 # df.to_csv('list_of_looping_transactions_trans_only.csv', index = False)
