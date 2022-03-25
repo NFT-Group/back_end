@@ -35,7 +35,7 @@ from add_real_usd_prices import add_real_usd_prices
 from trait_distribution import trait_distribution
 from match_trait_dis_values import match_trait_dis_values
 from whale_distributions import whale_distributions
-from clean_null_data import clean_null_data_transactions_data
+from NFTProject.back_end.machine_learning.archive_files.clean_null_data import clean_null_data_transactions_data
 
 from ordered_set import OrderedSet
 
@@ -266,20 +266,19 @@ def elastic_net(x_train, x_test, y_train, y_test):
 
 
 def random_forest_reg(x_train, x_test, y_train, y_test):
-        print("WHAT")
         train_error=[]
         test_error=[]
         minDepth=20
         maxDepth=40
         models=[]
-        for depth in range(minDepth,maxDepth,5):
-                regr=RandomForestRegressor(max_depth=depth, random_state=0,n_estimators=5)
-                regr.fit(x_train, y_train)
-                models.append(regr)
-                tr_error=math.sqrt(mean_squared_error(regr.predict(x_train),y_train))
-                te_error=math.sqrt(mean_squared_error(regr.predict(x_test),y_test))
-                test_error.append(tr_error)
-                train_error.append(te_error)
+        regr=RandomForestRegressor(max_depth=max_depth, random_state=0,n_estimators=100)
+        regr.fit(x_train, y_train)
+        # for depth in range(minDepth,maxDepth,5):
+        #         models.append(regr)
+        #         tr_error=math.sqrt(mean_squared_error(regr.predict(x_train),y_train))
+        #         te_error=math.sqrt(mean_squared_error(regr.predict(x_test),y_test))
+        #         test_error.append(tr_error)
+        #         train_error.append(te_error)
                 # print (depth,tr_error,te_error)
         # train_plot=pd.DataFrame(train_error,index=range(20,40,5),columns=["test_Data"])
         # test_plot=pd.DataFrame(test_error,index=range(20,40,5),columns=["train_Data"])
@@ -287,8 +286,7 @@ def random_forest_reg(x_train, x_test, y_train, y_test):
         # plotdata.plot()
         # x_test.size
         y_pred = regr.predict(x_test)
-        print("HWTA")
-        return(y_pred, y_test)
+        return(y_pred, y_test, regr) 
         # # compare y_pred vs y_test
         # y_test_vs_pred = np.zeros((len(y_test),2))
         # y_test_vs_pred[:, 0] = y_test
