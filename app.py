@@ -85,6 +85,7 @@ def index():
         trait["rarity"] = specific_value
 
     predicted_price = np.array2string(*predicted_price)
+    # doesn't quite work
     if (ipfs[0:4] == "ipfs"):
         ipfs = "https://ipfs.io/ipfs/" + ipfs[7:]
 
