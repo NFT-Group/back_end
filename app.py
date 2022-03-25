@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 import sklearn
 import pandas
@@ -17,6 +17,7 @@ CORS(app)
 
 @app.route("/", methods=["GET", "POST"])
 def index():
+    return request.data[2:-1]
     response = ""
     with open("hello.txt") as file:
         for line in file:
