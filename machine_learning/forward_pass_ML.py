@@ -5,6 +5,8 @@ import pathlib
 from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict, retrieve_certain_collection
 import firebase_admin
 from firebase_admin import db
+import numpy as np
+import json
 
 def find_price_predictor_from_tokenid(request):
     cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
@@ -39,14 +41,21 @@ def find_price_predictor_from_tokenid(request):
     collection = retrieve_certain_collection(collection_name)
     ipfs = collection.id_ipfs_dict[tokenID]
     trait_list = collection.trait_list_dict[tokenID]
+    trait_list_json = json.loads(trait_list)
 
-    print(type(predicted_price))
-    # trait_list = collection_dict[collection_name].metadatalist
-    response = '{"price":' + str(predicted_price)
+    for trait in trait_list_json:
+        category = trait["trait_type"]
+        row = collection.tokens_df.loc[collection.tokens_df['tokenID'] == np.int64(tokenID)]
+        specific_value = float(row[category])
+        trait["rarity"] = specific_value
+
+    predicted_price = np.array2string(*predicted_price)
+    response = '{"price":"' + predicted_price + '"},{"ipfs":' + ipfs + '},{"attributes":' + str(trait_list_json)
+    
     print(response)
 
     return predicted_price, ipfs, trait_list
 
-request = {"collection":"penguin","tokenid":"345"}
+request = {"collection":"doodle","tokenid":"123"}
 predicted_price, ipfs, trait_list = find_price_predictor_from_tokenid(request)
-print(predicted_price, ipfs, trait_list)
+# print(predicted_price, ipfs, trait_list)

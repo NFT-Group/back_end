@@ -17,7 +17,10 @@ for name in list_of_names:
     except:
         continue
 
+
     x = preprocessed_df.drop(['ethprice', 'tokenID'], axis=1)
+    if(name == 'cryptoad'):
+        x = x.drop(['# Traits'], axis =1)
     x = x.sort_index(axis=1, ascending=True) # IMPORTANT LINE OF CODE TO ENSURE LINEUP
     y = preprocessed_df['ethprice']
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=True)
