@@ -76,7 +76,6 @@ class Collection:
             metadata_temp = json.loads(metadata_temp)
             try:
                 metadata_temp2 = json.dumps(metadata_temp["attributes"])
-                print(metadata_temp2)
                 ipfs_temp = json.dumps(metadata_temp["image"])
             except KeyError:
                 continue
