@@ -77,6 +77,7 @@ class Collection:
             metadata_temp = json.loads(metadata_temp)
             try:
                 metadata_temp2 = json.dumps(metadata_temp["attributes"])
+                # print(metadata_temp2)
                 ipfs_temp = json.dumps(metadata_temp["image"])
             except KeyError:
                 continue
@@ -84,9 +85,9 @@ class Collection:
             self.metadata_list.append(metadata_temp2)  
             self.ipfs_link_list.append(ipfs_temp)
 
+            self.trait_list_dict = dict(zip(self.token_id_list, self.metadata_list))
             self.id_ipfs_dict = dict(zip(self.token_id_list, self.ipfs_link_list))
-        # self.token_id_list = token_id_list
-        # self.metadata_list = metadata_list
+
 
     def get_raw_transaction_data(self, og_trans_data):
         # initial split of transactions data from ordered dict into a 
