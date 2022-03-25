@@ -7,12 +7,17 @@ import json
 import pathlib
 import pandas as pd
 from collection_class import Collection
-from NFTProject.back_end.machine_learning.archive_files.preprocess import preprocess
 from sklearn.model_selection import train_test_split
 from analysis import analyse_results
-from NFTProject.back_end.machine_learning.ML_models_functions import random_forest_reg
+from ML_models_functions import random_forest_reg
 import pickle
-from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
+from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict, retrieve_certain_collection
+
+cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
+cred_push = firebase_admin.credentials.Certificate(cred_push_key)
+default_app = firebase_admin.initialize_app(cred_push, {
+    'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
+    })
 
 def reduce_df_most_recent(collection_df):
     # order by timestamp
@@ -49,7 +54,12 @@ def set_all_data_to_firebase(collections_dict):
         set_data_to_firebase(name, collection)
 
 # MAIN 
+
+clonex = retrieve_certain_collection('clonex')
+unique_sorted = reduce_df_most_recent(clonex.price_predict_archive_df)
+# set_data_to_firebase('clonex', unique_sorted)
+print(unique_sorted)
     
-collection_dict = retrieve_all_pickles_into_dict()
-unique_sorted_dicts = reduce_all_df_most_recent(collection_dict)
-set_all_data_to_firebase(unique_sorted_dicts)
+# collection_dict = retrieve_all_pickles_into_dict()
+# unique_sorted_dicts = reduce_all_df_most_recent(collection_dict)
+# set_all_data_to_firebase(unique_sorted_dicts)

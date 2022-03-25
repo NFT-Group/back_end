@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_cors import CORS
 import sklearn
 import pandas as pd
+import numpy as np
 import pickle
 import firebase_admin
 from firebase_admin import credentials, firestore, db
@@ -75,12 +76,19 @@ def index():
     collection = retrieve_certain_collection(collection_name)
     ipfs = collection.id_ipfs_dict[tokenID]
     trait_list = collection.trait_list_dict[tokenID]
-    # collection_dict = retrieve_all_pickles_into_dict()
-    # ipfs = collection_dict[collection_name].id_ipfs_dict[tokenID]
-    # predicted_price = str(predicted_price)
+    trait_list_json = json.loads(trait_list)
+
+    for trait in trait_list_json:
+        category = trait["trait_type"]
+        row = collection.tokens_df.loc[collection.tokens_df['tokenID'] == np.int64(tokenID)]
+        specific_value = float(row[category])
+        trait["rarity"] = specific_value
+
+    predicted_price = np.array2string(*predicted_price)
+    response = '{"price":"' + predicted_price + '"},{"ipfs":' + ipfs + '},{"attributes":' + str(trait_list_json)
 
     # return ("We predict that NFT is worth " + predicted_price + "ETH at this exact moment - wow!")
-    return str(predicted_price, ipfs, trait_list)
+    return response
 
 @app.route("/get_line_graph_data", methods=["GET", "POST"])
 def get_line_graph_data():

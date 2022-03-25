@@ -30,7 +30,9 @@ def find_price_predictor_from_tokenid(request):
     data_for_input = ref.get()
 
     # format input 
+    print(data_for_input)
     data_for_input_json = DataFrame([data_for_input])
+    print(data_for_input_json)
     data_for_input_json = data_for_input_json.drop(['NameOfCollection', 'ethprice', 'tokenID'], axis=1)
     data_for_input_json['timestamp'] = 0
 
@@ -56,6 +58,6 @@ def find_price_predictor_from_tokenid(request):
 
     return predicted_price, ipfs, trait_list
 
-request = {"collection":"doodle","tokenid":"123"}
+request = {"collection":"clonex","tokenid":"123"}
 predicted_price, ipfs, trait_list = find_price_predictor_from_tokenid(request)
 # print(predicted_price, ipfs, trait_list)
