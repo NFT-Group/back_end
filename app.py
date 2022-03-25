@@ -50,19 +50,10 @@ def index():
     predicted_price = loaded_model.predict(data_for_input_json)
 
     collection = retrieve_certain_collection(collection_name)
+    ipfs = collection.id_ipfs_dict[tokenID]
+    trait_list = collection.trait_list_dict[tokenID]
     # collection_dict = retrieve_all_pickles_into_dict()
     # ipfs = collection_dict[collection_name].id_ipfs_dict[tokenID]
-    ipfs = collection.id_ipfs_dict[tokenID]
 
-    return str(predicted_price)
+    return str(predicted_price, ipfs, trait_list)
 
-    # response = ""
-    # with open("hello.txt") as file:
-    #     for line in file:
-    #         response += line
-    # response += ". "
-    # if (os.path.exists("boredape_model.pkl")):
-    #     response += "Bored ape model exists!2"
-    # else:
-    #     response += "Bored ape model does NOT exist."
-    return response
