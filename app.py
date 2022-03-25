@@ -49,7 +49,7 @@ def index():
     collection_dict = retrieve_all_pickles_into_dict()
     ipfs = collection_dict[collection_name].id_ipfs_dict[tokenID]
 
-    return predicted_price
+    return str(predicted_price)
 
     # response = ""
     # with open("hello.txt") as file:
