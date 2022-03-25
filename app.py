@@ -57,6 +57,5 @@ def index():
     # predicted_price = str(predicted_price)
 
     # return ("We predict that NFT is worth " + predicted_price + "ETH at this exact moment - wow!")
-    return predicted_price
     return str(predicted_price, ipfs, trait_list)
 
