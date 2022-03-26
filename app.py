@@ -122,14 +122,14 @@ def get_line_graph_data():
     dates = dates.rename(columns={0: 'timestamp'})
 
     all_trans = ref.order_by_child('timestamp').start_at(start_time).get()
+    collection_df = pd.DataFrame.from_dict(all_trans, orient="index")
+    collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
+    collection_df = collection_df[collection_df.ethprice != 0]
+    collection_df['ethprice'] = collection_df['ethprice'] + 1
 
     for i, name in enumerate(list_of_names):
         address = collection_name_dict[name]
-        #collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
-        collection_df = pd.DataFrame.from_dict(all_trans, orient="index")
-        collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
-        collection_df = collection_df[collection_df.ethprice != 0]
-
+        # collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
         # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
         collection_df = collection_df.drop([
             'tokenid',
@@ -161,7 +161,7 @@ def get_line_graph_data():
         dates = dates.fillna(0)
 
     dates['timestamp'] = dates['timestamp'].dt.strftime("%Y-%m-%d")
-    dates['ethprice'] = dates['ethprice'] + 1
+    #dates['ethprice'] = dates['ethprice'] + 1
 
     retval = dates.to_json(orient='records')
     return retval
