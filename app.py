@@ -90,7 +90,7 @@ def index():
         ipfs = "https://ipfs.io/ipfs/" + ipfs[7:]
 
 
-    response = '{"price":"' + predicted_price + '", "ipfs":"' + ipfs + '", "attributes":"' + str(trait_list_json) + '"}'
+    response = '{"price":"' + predicted_price + '", "ipfs":' + ipfs + ', "attributes":"' + str(trait_list_json) + '"}'
 
     # return ("We predict that NFT is worth " + predicted_price + "ETH at this exact moment - wow!")
     return response
