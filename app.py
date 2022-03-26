@@ -161,6 +161,7 @@ def get_line_graph_data():
         dates = dates.fillna(0)
 
     dates['timestamp'] = dates['timestamp'].dt.strftime("%Y-%m-%d")
+    dates['ethprice'] = dates['ethprice'] + 1
 
     retval = dates.to_json(orient='records')
     return retval
