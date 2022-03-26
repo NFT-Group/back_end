@@ -125,13 +125,9 @@ def get_line_graph_data():
     collection_df = pd.DataFrame.from_dict(all_trans, orient="index")
     collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
     collection_df = collection_df[collection_df.ethprice != 0]
+    
     collection_df['ethprice'] = collection_df['ethprice'] + 1
-
-    for i, name in enumerate(list_of_names):
-        address = collection_name_dict[name]
-        # collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
-        # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
-        collection_df = collection_df.drop([
+    collection_df = collection_df.drop([
             'tokenid',
             'fromaddress', 
             'toaddress',
@@ -139,6 +135,12 @@ def get_line_graph_data():
             'transactionhash',
             'blocknumber',
             ], axis=1)
+
+    for i, name in enumerate(list_of_names):
+        address = collection_name_dict[name]
+        # collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
+        # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
+        
         collection_df_copy = collection_df
         # delete first, redundant column
         collection_df_copy = collection_df_copy.iloc[:,0:]
