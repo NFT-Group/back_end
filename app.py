@@ -126,7 +126,7 @@ def get_line_graph_data():
     collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
     collection_df = collection_df[collection_df.ethprice != 0]
     
-    collection_df['ethprice'] = collection_df['ethprice'] + 1
+    #collection_df['ethprice'] = collection_df['ethprice'] + 1
     collection_df = collection_df.drop([
             'tokenid',
             'fromaddress', 
@@ -163,6 +163,14 @@ def get_line_graph_data():
         dates = dates.fillna(0)
 
     dates['timestamp'] = dates['timestamp'].dt.strftime("%Y-%m-%d")
+    dates['boredape'] = dates['boredape'] + 1
+    dates['boredapekennel'] = dates['boredapekennel'] + 1
+    dates['clonex'] = dates['clonex'] + 1
+    dates['coolcat'] = dates['coolcat'] + 1
+    dates['cryptoad'] = dates['cryptoad'] + 1
+    dates['doodle'] = dates['doodle'] + 1
+    dates['penguin'] = dates['penguin'] + 1
+    dates['punk'] = dates['punk'] + 1
     #dates['ethprice'] = dates['ethprice'] + 1
 
     retval = dates.to_json(orient='records')
