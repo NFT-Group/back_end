@@ -104,14 +104,14 @@ def get_line_graph_data():
     list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
     collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress, "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress, "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
 
-    if (timeframe == 'day'):
-        timeframe = 86400
-    elif (timeframe == 'week'):
+    if (timeframe == 'week'):
         timeframe = 604800
     elif (timeframe == 'month'):
-        timeframe = 2678400
-    elif (timeframe == 'year'):
-        timeframe = 31556952
+        timeframe = 2592000
+    elif (timeframe == '3months'):
+        timeframe = 7776000
+    elif (timeframe == '6months'):
+        timeframe = 15552000
     
     start_time = time.time () - timeframe
 
