@@ -104,14 +104,14 @@ def get_line_graph_data():
     list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
     collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress, "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress, "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
 
-    if (timeframe == 'week'):
-        timeframe = 604800
-    elif (timeframe == 'month'):
+    if (timeframe == 'month'):
         timeframe = 2592000
     elif (timeframe == '3months'):
         timeframe = 7776000
     elif (timeframe == '6months'):
         timeframe = 15552000
+    elif (timeframe == 'year'):
+        timeframe = 31556952
     
     start_time = time.time () - timeframe
 
@@ -143,7 +143,8 @@ def get_line_graph_data():
         # delete first, redundant column
         collection_df_copy = collection_df_copy.iloc[:,0:]
 
-        collection_df_copy = collection_df_copy.drop(collection_df_copy[collection_df_copy['contracthash'] != address].index)
+        collection_df_copy = collection_df_copy[collection_df_copy.contracthash == address]
+        #collection_df_copy = collection_df_copy.drop(collection_df_copy[collection_df_copy['contracthash'] != address].index)
 
         # get the last year's data
         collection_df_copy = collection_df_copy.groupby('timestamp', as_index=False)['ethprice'].mean()
