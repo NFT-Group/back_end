@@ -255,21 +255,23 @@ if __name__ == '__main__':
     print("old latest block")
     print(latest_block_number)
 
-    while (((latest_block_number - latest_firebase_block) % 10) != 0):
+    catch_up_speed = 1000
+
+    while (((latest_block_number - latest_firebase_block) % catch_up_speed) != 0):
         latest_firebase_block -= 1
 
     print("new latest firebase block")
     print(latest_firebase_block)
 
     ## scan from a to b for all 8 collections
-    retrieve(cd.apeABI, cd.apeAddress, latest_firebase_block, latest_block_number, 10)
-    retrieve(cd.boredApeKennelABI, cd.boredApeKennelAddress, latest_firebase_block, latest_block_number, 10)
-    retrieve(cd.doodlesABI, cd.doodlesAddress, latest_firebase_block, latest_block_number, 10)
-    retrieve(cd.coolCatsABI, Web3.toChecksumAddress(cd.coolCatsAddress), latest_firebase_block, latest_block_number, 10)
-    retrieve(cd.cloneXABI, cd.cloneXAddress, latest_firebase_block, latest_block_number, 10)
-    retrieve(cd.crypToadzABI, cd.crypToadzAddress, latest_firebase_block, latest_block_number, 10)
-    retrieve(cd.pudgyPenguinABI, cd.pudgyPenguinAddress, latest_firebase_block, latest_block_number, 10)
-    retrieve_punks(latest_firebase_block, latest_block_number, 10)
+    retrieve(cd.apeABI, cd.apeAddress, latest_firebase_block, latest_block_number, catch_up_speed)
+    retrieve(cd.boredApeKennelABI, cd.boredApeKennelAddress, latest_firebase_block, latest_block_number, catch_up_speed)
+    retrieve(cd.doodlesABI, cd.doodlesAddress, latest_firebase_block, latest_block_number, catch_up_speed)
+    retrieve(cd.coolCatsABI, Web3.toChecksumAddress(cd.coolCatsAddress), latest_firebase_block, latest_block_number, catch_up_speed)
+    retrieve(cd.cloneXABI, cd.cloneXAddress, latest_firebase_block, latest_block_number, catch_up_speed)
+    retrieve(cd.crypToadzABI, cd.crypToadzAddress, latest_firebase_block, latest_block_number, catch_up_speed)
+    retrieve(cd.pudgyPenguinABI, cd.pudgyPenguinAddress, latest_firebase_block, latest_block_number, catch_up_speed)
+    retrieve_punks(latest_firebase_block, latest_block_number, catch_up_speed)
     ## find latest ethereum chain block number again (c)
     block = web3.eth.get_block('latest')
     REAL_latest_block_number = block['number']
