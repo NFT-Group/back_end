@@ -100,6 +100,7 @@ def get_line_graph_data():
     data = request.data
     data = json.loads(data)
     timeframe = data['timeframe']
+    data_type = data['data_type']
     
     list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
     collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress, "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress, "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
@@ -123,8 +124,9 @@ def get_line_graph_data():
 
     all_trans = ref.order_by_child('timestamp').start_at(start_time).get()
     collection_df = pd.DataFrame.from_dict(all_trans, orient="index")
-    collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
-    collection_df = collection_df[collection_df.ethprice != 0]
+    if (data_type == 'price'):
+        collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
+        collection_df = collection_df[collection_df.ethprice != 0]
     
     #collection_df['ethprice'] = collection_df['ethprice'] + 1
     collection_df = collection_df.drop([
@@ -147,16 +149,16 @@ def get_line_graph_data():
 
         collection_df_copy = collection_df_copy[collection_df_copy.contracthash == address]
         #collection_df_copy = collection_df_copy.drop(collection_df_copy[collection_df_copy['contracthash'] != address].index)
-
-        # get the last year's data
-        collection_df_copy = collection_df_copy.groupby('timestamp', as_index=False)['ethprice'].mean()
-
-        #collection_df = collection_df.drop(collection_df[collection_df.timestamp < one_year_ago].index)
-
-        collection_df_copy = collection_df_copy.rename(columns={'ethprice': name})
-        
         # change data type to timestamp so we can compare
         collection_df_copy['timestamp'] = pd.to_datetime(collection_df_copy['timestamp'], format='%Y-%m-%d')
+
+        # get the last year's data
+        if (data_type == 'price'):
+            collection_df_copy = collection_df_copy.groupby('timestamp', as_index=False)['ethprice'].mean()
+            collection_df_copy = collection_df_copy.rename(columns={'ethprice': name})
+        elif (data_type == 'volume'):
+            collection_df_copy = collection_df_copy.groupby('timestamp', as_index=False).size()
+            collection_df_copy = collection_df_copy.rename(columns={'size': name})
 
         dates = dates.merge(collection_df_copy, on='timestamp', how='left')
         dates = dates.fillna(method='ffill')

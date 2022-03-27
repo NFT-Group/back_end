@@ -100,7 +100,7 @@ def prep_all_collection_data(list_of_names, collection_address_dict):
 
 # average price per day per collection
 
-one_year_ago = time.time() - 3.154e7 #number of seconds in a year
+one_year_ago = time.time() - 15552000 #3.154e7 #number of seconds in a year
 one_year_ago = datetime.utcfromtimestamp(int(one_year_ago)).strftime('%Y-%m-%d')
 print(one_year_ago)
 
@@ -111,47 +111,77 @@ def add_collection_col_for_mean_price_over_time(dates, collection_df, collection
     # delete first, redundant column
     collection_df = collection_df.iloc[:,0:]
 
+    print("1")
+    print(collection_df)
+
+    
+
+    print("2")
+    print(collection_df)
+
     # get the last year's data
-    collection_df = collection_df.groupby('timestamp', as_index=False)['ethprice'].mean()
-    collection_df = collection_df.drop(collection_df[collection_df.timestamp < one_year_ago].index)
-    collection_df = collection_df.rename(columns={'ethprice': collection_name})
+    collection_df = collection_df.groupby('timestamp', as_index=False).size()
+
+    print("3")
+    print(collection_df)
     
     # change data type to timestamp so we can compare
     collection_df['timestamp'] = pd.to_datetime(collection_df['timestamp'], format='%Y-%m-%d')
 
+    collection_df = collection_df.rename(columns={'size': collection_name})
+
+    print("4")
+    print(collection_df)
+
     dates = dates.merge(collection_df, on='timestamp', how='left')
+
+    print("5")
+    print(collection_df)
+    
     dates = dates.fillna(method='ffill')
     dates = dates.fillna(0)
+
+    print("6")
+    print(collection_df)
 
     return dates
 
 
 
 ref = db.reference('/', app=transactions_app)
-dates = pd.DataFrame(pd.date_range(one_year_ago, freq="D", periods=365))
+dates = pd.DataFrame(pd.date_range(one_year_ago, freq="D", periods=(30*6)))
 dates = dates.rename(columns={0: 'timestamp'})
 
-for i, name in enumerate(list_of_names):
-    address = collection_name_dict[name]
-    collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
-    collection_df = pd.DataFrame.from_dict(collection_trans, orient="index")
-    collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
-    collection_df = collection_df[collection_df.ethprice != 0]
+print("here1")
+collection_trans = ref.order_by_child('timestamp').start_at(one_year_ago).get()
+print("here2")
+collection_df = pd.DataFrame.from_dict(collection_trans, orient="index")
+collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
+collection_df = collection_df[collection_df.ethprice != 0]
 
-    # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
-    collection_df = collection_df.drop([
-        'tokenid',
-        'fromaddress', 
-        'toaddress',
-        'tokenuri',
-        'transactionhash',
-        'blocknumber',
-        'contracthash'
-        ], axis=1)
+# REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
+collection_df = collection_df.drop([
+    'tokenid',
+    'fromaddress', 
+    'toaddress',
+    'tokenuri',
+    'transactionhash',
+    'blocknumber',
+], axis=1)
+
+#collection_df = collection_df.drop(collection_df[collection_df.timestamp < one_year_ago].index)
+
+for i, name in enumerate(list_of_names):
+    print(name)
+    address = collection_name_dict[name]
+
+    collection_df_copy = collection_df
+    collection_df_copy = collection_df_copy[collection_df_copy.contracthash == address]
+    
     # collection_df.timestamp = pd.to_datetime(collection_df.timestamp)
     # collection_df.timestamp = now - collection_df.timestamp
     # collection_df.timestamp = collection_df.timestamp.apply(lambda x: x.total_seconds())
-    dates = add_collection_col_for_mean_price_over_time(dates, collection_df, name)
+    dates = add_collection_col_for_mean_price_over_time(dates, collection_df_copy, name)
 
 print(dates)
 dates['timestamp'] = dates['timestamp'].dt.strftime("%Y-%m-%d")
