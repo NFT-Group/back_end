@@ -173,11 +173,10 @@ def get_line_graph_data():
     return retval
 
 @app.route("/get_line_graph_data_volume", methods=["POST"])
-def get_line_graph_data():
+def get_line_graph_data_volume():
     data = request.data
     data = json.loads(data)
     timeframe = data['timeframe']
-    data_type = data['data_type']
     
     list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
     collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress, "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress, "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
