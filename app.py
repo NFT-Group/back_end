@@ -95,7 +95,84 @@ def index():
     # return ("We predict that NFT is worth " + predicted_price + "ETH at this exact moment - wow!")
     return response
 
-@app.route("/get_line_graph_data", methods=["GET", "POST"])
+@app.route("/get_line_graph_data", methods=["POST"])
+def get_line_graph_data():
+    data = request.data
+    data = json.loads(data)
+    timeframe = data['timeframe']
+    
+    list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
+    collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress, "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress, "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
+
+    if (timeframe == 'month'):
+        timeframe = 2592000
+    elif (timeframe == '3months'):
+        timeframe = 7776000
+    elif (timeframe == '6months'):
+        timeframe = 15552000
+    elif (timeframe == 'year'):
+        timeframe = 31556952
+    
+    start_time = time.time () - timeframe
+
+    start_time = datetime.utcfromtimestamp(int(start_time)).strftime('%Y-%m-%d')
+
+    ref = db.reference('/', app=transactions_app)
+    dates = pd.DataFrame(pd.date_range(start_time, freq="D", periods=(timeframe / 86400)))
+    dates = dates.rename(columns={0: 'timestamp'})
+
+    all_trans = ref.order_by_child('timestamp').start_at(start_time).get()
+    collection_df = pd.DataFrame.from_dict(all_trans, orient="index")
+    collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
+    collection_df = collection_df[collection_df.ethprice != 0]
+    
+    #collection_df['ethprice'] = collection_df['ethprice'] + 1
+    collection_df = collection_df.drop([
+            'tokenid',
+            'fromaddress', 
+            'toaddress',
+            'tokenuri',
+            'transactionhash',
+            'blocknumber',
+            ], axis=1)
+
+    for i, name in enumerate(list_of_names):
+        address = collection_name_dict[name]
+        # collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
+        # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
+        
+        collection_df_copy = collection_df
+        # delete first, redundant column
+        collection_df_copy = collection_df_copy.iloc[:,0:]
+
+        collection_df_copy = collection_df_copy[collection_df_copy.contracthash == address]
+        #collection_df_copy = collection_df_copy.drop(collection_df_copy[collection_df_copy['contracthash'] != address].index)
+        # change data type to timestamp so we can compare
+        collection_df_copy['timestamp'] = pd.to_datetime(collection_df_copy['timestamp'], format='%Y-%m-%d')
+
+        # get the last year's data
+        collection_df_copy = collection_df_copy.groupby('timestamp', as_index=False)['ethprice'].mean()
+        collection_df_copy = collection_df_copy.rename(columns={'ethprice': name})
+
+        dates = dates.merge(collection_df_copy, on='timestamp', how='left')
+        dates = dates.fillna(method='ffill')
+        dates = dates.fillna(0)
+
+    dates['timestamp'] = dates['timestamp'].dt.strftime("%Y-%m-%d")
+    dates['boredape'] = dates['boredape'] + 1
+    dates['boredapekennel'] = dates['boredapekennel'] + 1
+    dates['clonex'] = dates['clonex'] + 1
+    dates['coolcat'] = dates['coolcat'] + 1
+    dates['cryptoad'] = dates['cryptoad'] + 1
+    dates['doodle'] = dates['doodle'] + 1
+    dates['penguin'] = dates['penguin'] + 1
+    dates['punk'] = dates['punk'] + 1
+    #dates['ethprice'] = dates['ethprice'] + 1
+
+    retval = dates.to_json(orient='records')
+    return retval
+
+@app.route("/get_line_graph_data_volume", methods=["POST"])
 def get_line_graph_data():
     data = request.data
     data = json.loads(data)
@@ -124,9 +201,6 @@ def get_line_graph_data():
 
     all_trans = ref.order_by_child('timestamp').start_at(start_time).get()
     collection_df = pd.DataFrame.from_dict(all_trans, orient="index")
-    if (data_type == 'price'):
-        collection_df = collection_df[collection_df.fromaddress != '0x0000000000000000000000000000000000000000']
-        collection_df = collection_df[collection_df.ethprice != 0]
     
     #collection_df['ethprice'] = collection_df['ethprice'] + 1
     collection_df = collection_df.drop([
@@ -153,12 +227,8 @@ def get_line_graph_data():
         collection_df_copy['timestamp'] = pd.to_datetime(collection_df_copy['timestamp'], format='%Y-%m-%d')
 
         # get the last year's data
-        if (data_type == 'price'):
-            collection_df_copy = collection_df_copy.groupby('timestamp', as_index=False)['ethprice'].mean()
-            collection_df_copy = collection_df_copy.rename(columns={'ethprice': name})
-        elif (data_type == 'volume'):
-            collection_df_copy = collection_df_copy.groupby('timestamp', as_index=False).size()
-            collection_df_copy = collection_df_copy.rename(columns={'size': name})
+        collection_df_copy = collection_df_copy.groupby('timestamp', as_index=False).size()
+        collection_df_copy = collection_df_copy.rename(columns={'size': name})
 
         dates = dates.merge(collection_df_copy, on='timestamp', how='left')
         dates = dates.fillna(method='ffill')
