@@ -58,6 +58,6 @@ def find_price_predictor_from_tokenid(request):
 
     return predicted_price, ipfs, trait_list
 
-request = {"collection":"clonex","tokenid":"123"}
+request = {"collection":"boredape","tokenid":"1000"}
 predicted_price, ipfs, trait_list = find_price_predictor_from_tokenid(request)
 # print(predicted_price, ipfs, trait_list)

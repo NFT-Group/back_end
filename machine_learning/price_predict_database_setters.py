@@ -21,6 +21,8 @@ default_app = firebase_admin.initialize_app(cred_push, {
 
 def reduce_df_most_recent(collection_df):
     # order by timestamp
+    collection_df.timestamp = pd.to_datetime(
+        collection_df.timestamp)
     sorted_df = collection_df.sort_values('timestamp', ascending = True)
     uniq_sorted_df = sorted_df.drop_duplicates(subset=['tokenID'], keep='first')
     return uniq_sorted_df
@@ -55,11 +57,11 @@ def set_all_data_to_firebase(collections_dict):
 
 # MAIN 
 
-clonex = retrieve_certain_collection('clonex')
-unique_sorted = reduce_df_most_recent(clonex.price_predict_archive_df)
-# set_data_to_firebase('clonex', unique_sorted)
-print(unique_sorted)
+# clonex = retrieve_certain_collection('clonex')
+# unique_sorted = reduce_df_most_recent(clonex.price_predict_archive_df)
+# # set_data_to_firebase('clonex', unique_sorted)
+# print(unique_sorted)
     
-# collection_dict = retrieve_all_pickles_into_dict()
-# unique_sorted_dicts = reduce_all_df_most_recent(collection_dict)
-# set_all_data_to_firebase(unique_sorted_dicts)
+collection_dict = retrieve_all_pickles_into_dict()
+unique_sorted_dicts = reduce_all_df_most_recent(collection_dict)
+set_all_data_to_firebase(unique_sorted_dicts)
