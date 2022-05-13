@@ -53,15 +53,17 @@ transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
 
 def prep_individual_collection_data(address, collection_name, next_collection_name):
     ref = db.reference('/', app=tokens_app)
-    if next_collection_name == None:
-        return
-        collection_tokens = ref.order_by_key().start_at(collection_name).get()
+    if (next_collection_name == None):
+        # return
+        print("hi")
+        collection_tokens = ref.order_by_key().start_at(collection_name).limit_to_first(1).get()
     else:
-        collection_tokens = ref.order_by_key().start_at(collection_name).end_at(next_collection_name).get()
+        collection_tokens = ref.order_by_key().start_at(collection_name).end_at(next_collection_name).limit_to_first(1).get()
     ref = db.reference('/', app=transactions_app)
     collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
     # print(collection_tokens)
-    collection = Collection(collection_tokens, collection_trans)
+    print(collection_tokens)
+    collection = Collection(collection_name, collection_tokens, collection_trans)
     collection.prep_data()
     if collection_name == 'cryptoad':
         collection.price_predict_archive_df = collection.price_predict_archive_df.drop('# Traits', 1)
@@ -87,4 +89,7 @@ for name, collection in collection_dict.items():
         '/collections_pkl_folder/' + name +
         '_collection_class.pkl', 'wb') as handle:
             pickle.dump(collection, handle)
+
+# bored_apes = prep_individual_collection_data(apeAddress, 'boredape', 'boredapekennel')
+# punks = prep_individual_collection_data(cryptoPunkAddress, 'punk', None)
 

@@ -11,13 +11,16 @@ import calendar
 
 class Collection:
 
-    def __init__(self, og_token_data, og_trans_data):
+    def __init__(self, collection_name, og_token_data, og_trans_data):
+        self.collection_name = collection_name
         self.og_token_data = og_token_data
         self.og_trans_data = og_trans_data
 
     def prep_data(self):
 
         # read in data from firebase into manageable formats
+        if(self.collection_name == 'punk'):
+            self.split_punk_data()
         self.split_data(self.og_token_data)
         self.get_raw_transaction_data(self.og_trans_data)
 
@@ -85,6 +88,8 @@ class Collection:
 
         self.trait_list_dict = dict(zip(self.token_id_list, self.metadata_list))
         self.id_ipfs_dict = dict(zip(self.token_id_list, self.ipfs_link_list))
+
+    # def split_punk_data(self):
 
 
     def get_raw_transaction_data(self, og_trans_data):
@@ -327,6 +332,8 @@ class Collection:
             how='outer')
         self.price_predict_archive_df = self.price_predict_archive_df.drop(
                 ['tokenid'], axis=1)
+        self.price_predict_archive_df.fillna(0, inplace=True)
+        
     
         self.preprocessed_df = self.preprocessed_df.drop(['tokenid'], axis=1)
         now = datetime.now()
@@ -346,8 +353,8 @@ class Collection:
         #     self.preprocessed_df.running_sell_count.astype(float))
         # self.preprocessed_df.running_whale_weight = self._normalise(
         #     self.preprocessed_df.running_whale_weight.astype(float))
-        self.preprocessed_df.timestamp = self._normalise(
-            self.preprocessed_df.timestamp.astype(float))
+        # self.preprocessed_df.timestamp = self._normalise(
+        #     self.preprocessed_df.timestamp.astype(float))
 
     def _normalise(self, column):
         if column.min() == column.max():
