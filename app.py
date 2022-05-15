@@ -36,19 +36,14 @@ cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/machine_learnin
 cred_push = firebase_admin.credentials.Certificate(cred_push_key)
 cred_pull_transactions_key = str(pathlib.Path(__file__).parent.resolve()) + '/machine_learning/database_store_keys/key_for_all_transactions_store.json'
 cred_pull_transactions = firebase_admin.credentials.Certificate(cred_pull_transactions_key)
-try:
-    default_app = firebase_admin.initialize_app(cred_push, {
-        'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
-    })
-except:
-    a = cred_push
 
-try:
-    transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
-        'databaseURL':'https://allcollections-6e66c-default-rtdb.europe-west1.firebasedatabase.app/'
-    }, name='transactions_app')
-except:
-    a = cred_pull_transactions
+default_app = firebase_admin.initialize_app(cred_push, {
+    'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
+})
+
+transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
+    'databaseURL':'https://allcollections-6e66c-default-rtdb.europe-west1.firebasedatabase.app/'
+}, name='transactions_app')
 
 @app.route("/", methods=["GET", "POST"])
 def index():
