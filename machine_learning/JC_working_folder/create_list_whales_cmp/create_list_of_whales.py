@@ -70,7 +70,7 @@ def create_node_graph_data(transactions, jsn_output_name):
         temp = transactions.loc[transactions['fromaddress'] == seller_id, 'toaddress']
         buyers_from_top_seller_list.append(temp.tolist())
 
-
+    
     buyers_from_top_seller_list = [address for sublist in buyers_from_top_seller_list for address in sublist]
     df = pd.DataFrame(buyers_from_top_seller_list)
 
