@@ -10,42 +10,19 @@ import pickle
 # from trait_distribution import trait_distribution 
 import json
 import pathlib
-from collection_class_lite import Collection_lite
+import os
+import sys
+import inspect
 
 
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir1 = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir1) 
 
-def get_firebase_data_return_pkl_file(pkl_file_name, address, full_database_key, all_transactions_key):
+from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
 
-    # CREATE LINK FOR 'FULL DATABASE'
-
-    cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + full_database_key
-    cred_push = firebase_admin.credentials.Certificate(cred_push_key)
-    default_app = firebase_admin.initialize_app(cred_push, {
-        'databaseURL':'https://full-database-9c028-default-rtdb.europe-west1.firebasedatabase.app/'
-        })
-
-    # CREATE LINK FOR 'ALL TRANSACTIONS' DATABASE
-
-    cred_pull_transactions_key = str(pathlib.Path(__file__).parent.resolve()) + all_transactions_key
-    cred_pull_transactions = firebase_admin.credentials.Certificate(cred_pull_transactions_key)
-    transactions_app = firebase_admin.initialize_app(cred_pull_transactions, {
-        'databaseURL':'https://allcollections-6e66c-default-rtdb.europe-west1.firebasedatabase.app/'
-        }, name='transactions_app')
-
-
-    # JUST ONE BORED APES EXAMPLE FOR NOW BUT CAN MAKE THIS SECTION TRAVERSABLE LATER
-
-    ref = db.reference('/', app=transactions_app)
-    transactions = ref.order_by_child('contracthash').equal_to(address).get()
-    # print(transactions)
-    collection = Collection_lite(transactions)
-    collection.prep_data()
-    print(collection)
-    collection.transactions_df.to_pickle(pkl_file_name)
-
-
-def create_node_graph_data(pkl_file_name, jsn_output_name, pickle_whale_loops):
-    transactions = pd.read_pickle(pkl_file_name)
+def create_sus_transactions_from_loops(transactions_df, jsn_output_name, pickle_whale_loops):
+    transactions = transactions_df #pd.read_pickle(pkl_file_name)
     transactions.sort_values("running_whale_weight", ascending = False, inplace = True)
     top_transactions = transactions['fromaddress'].unique()
 
@@ -100,18 +77,18 @@ def create_node_graph_data(pkl_file_name, jsn_output_name, pickle_whale_loops):
 
 
 def find_wallet_name(name):
-    web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
-    ns = ENS.fromWeb3(web3)
-    try:
-        wallet_name = ns.name(name)
-        if(wallet_name == None):
-            wallet_name = name
-        else:
-            wallet_name = wallet_name.replace(".", "_")
-    except:
-        wallet_name = name
-        print("error")
-    return wallet_name
+    # web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
+    # ns = ENS.fromWeb3(web3)
+    # try:
+    #     wallet_name = ns.name(name)
+    #     if(wallet_name == None):
+    #         wallet_name = name
+    #     else:
+    #         wallet_name = wallet_name.replace(".", "_")
+    # except:
+    #     wallet_name = name
+    #     print("error")
+    return name #wallet_name
 
 
 
@@ -131,13 +108,27 @@ collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodles
         "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
         "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
 
-# Make json files 
-# list_pkl_whale_loops = ['bored_ape_loops.pkl']
-list_pkl_filename = ['boredape_loops.pkl', 'boredapekennel_loops.pkl', 'coolcat_loops.pkl', 'doodle_loops.pkl', 'clonex_loops.pkl', 'cryptoad_loops.pkl', 'penguin_loops.pkl']
-list_json_output_name = ['bored_ape_yacht_club_loops.json', 'bored_ape_kennel_club_loops.json', 'cool_cats_loops.json', 'doodles_loops.json', 'clonex_loops.json', 'cryptoadz_loops.json', 'pudgy_penguins_loops.json']
-list_address = [apeAddress, boredApeKennelAddress, coolCatsAddress, doodlesAddress, cloneXAddress, crypToadzAddress, pudgyPenguinAddress]
-full_database_key = '../database_store_keys/key_for_full_database_store.json'
-all_tokens_key = '../database_store_keys/key_for_all_tokens_store.json'
-all_transactions_key = '../database_store_keys/key_for_all_transactions_store.json'
-for i in range(len(list_pkl_filename)):
-    create_node_graph_data(list_pkl_filename[i], list_json_output_name[i], )
+
+
+
+
+# Aiming to take list of loop transactions
+
+def node_data():
+    collection_dict = retrieve_all_pickles_into_dict()
+    for name, collection in collection_dict.items():
+        if(collection != None):
+            transactions_df = collection.transactions_df
+            print(name)
+            create_sus_transactions_from_loops(transactions_df, "loop_graph_json/" + name + "_loops.json", "pkl_loop_dump/" + name + "_loops.pkl")
+
+node_data()
+
+# list_pkl_filename = ['boredape_loops.pkl', 'boredapekennel_loops.pkl', 'coolcat_loops.pkl', 'doodle_loops.pkl', 'clonex_loops.pkl', 'cryptoad_loops.pkl', 'penguin_loops.pkl']
+# list_json_output_name = ['bored_ape_yacht_club_loops.json', 'bored_ape_kennel_club_loops.json', 'cool_cats_loops.json', 'doodles_loops.json', 'clonex_loops.json', 'cryptoadz_loops.json', 'pudgy_penguins_loops.json']
+# list_address = [apeAddress, boredApeKennelAddress, coolCatsAddress, doodlesAddress, cloneXAddress, crypToadzAddress, pudgyPenguinAddress]
+# full_database_key = '../database_store_keys/key_for_full_database_store.json'
+# all_tokens_key = '../database_store_keys/key_for_all_tokens_store.json'
+# all_transactions_key = '../database_store_keys/key_for_all_transactions_store.json'
+# for i in range(len(list_pkl_filename)):
+#     create_node_graph_data(list_pkl_filename[i], list_json_output_name[i], )
