@@ -12,5 +12,10 @@ def analyse_results(y_pred, y_test, name):
         # by increasing it to 128 trees
         print('MAPE:', metrics.mean_absolute_percentage_error(y_test, y_pred))
 
+        # the point of this is to help explain the potential large MAPEs on
+        # certain run throughs of the analysis. We think this could be related 
+        # to a few massive anomalies skewing the data and this could prove it
+        print("Max Error: ", metrics.max_error(y_test, y_pred))
+
         # for positive results coefficient of variation is a good measure to compare different models
         # print('Coefficient of variation: ', metrics.mean_squared_error/metrics.mean)

@@ -35,7 +35,7 @@ class Collection:
             self.trait_values_distribution, columns = self.trait_header_list_mod)
         self.transactions_df = pd.DataFrame(
             self.transactions_values, columns = self.transactions_keys)
-        self.transactions_df = self.remove_garbage_values(self.transactions_df)
+        self.transactions_df = remove_garbage_values(self.transactions_df)
 
         # add derived information for ML
         self.add_sell_count()
@@ -305,7 +305,8 @@ class Collection:
 
     def preprocess(self):
 
-        self.preprocessed_df = self.remove_garbage_values(self.prepped_df)
+        # REMOVE GARBAGE VALUES
+        self.preprocessed_df = remove_garbage_values(self.prepped_df)
 
         # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
         self.preprocessed_df = self.preprocessed_df.drop([
@@ -316,6 +317,7 @@ class Collection:
             'blocknumber',
             'contracthash',
             ], axis=1)
+
 
         # PREP AN ALTERNATIVE DATAFRAME WHICH WILL BE USED FOR RETRIEVING
         # INSTANCES OF NFTS FROM THE WEBSITE FOR THE ML MODELS
@@ -340,16 +342,6 @@ class Collection:
         self.preprocessed_df.timestamp = self.preprocessed_df.timestamp.apply(
             lambda x: x.total_seconds())
 
-    def remove_garbage_values(self, dataframe):
-        # REMOVED ROWS WHICH HAVE GARBAGE VALUES
-        dataframe = dataframe[
-            dataframe.fromaddress != '0x0000000000000000000000000000000000000000']
-        dataframe = dataframe[
-            dataframe.ethprice != 0]
-
-        return dataframe
-
-
 
     def _normalise(self, column):
         if column.min() == column.max():
@@ -359,3 +351,11 @@ class Collection:
         return normal_col  
 
 
+def remove_garbage_values(dataframe):
+    # REMOVED ROWS WHICH HAVE GARBAGE VALUES
+    new_dataframe = dataframe[
+        dataframe.fromaddress != '0x0000000000000000000000000000000000000000']
+    new_dataframe = new_dataframe[
+        new_dataframe.ethprice != 0]
+
+    return dataframe
