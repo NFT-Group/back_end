@@ -9,6 +9,7 @@ def random_forest_reg(x_train, x_test, y_train, y_test):
         minDepth=20
         maxDepth=40
         models=[]
+        # n.b. we want a larger forest than 32 but github doesn't let us use them
         regr=RandomForestRegressor(max_depth=maxDepth, random_state=0,n_estimators=32)
         regr.fit(x_train, y_train)
         y_pred = regr.predict(x_test)

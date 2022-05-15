@@ -4,7 +4,7 @@ from collections import OrderedDict
 from ordered_set import OrderedSet
 import pandas as pd
 import re
-from machine_learning.find_frequency_of_values import find_frequency_of_value
+from find_frequency_of_values import find_frequency_of_value
 from datetime import datetime
 import time
 import calendar
