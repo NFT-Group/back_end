@@ -80,6 +80,8 @@ def find_all_buyers(transactions_df, whale_address, target_address, list_of_addr
 def loop_data():
     collection_dict = retrieve_all_pickles_into_dict()
     for name, collection in collection_dict.items():
+            if(collection == None):
+                return
             transactions_df = collection.transactions_df
             print(name)
             transactions_df.sort_values("running_whale_weight", ascending = False, inplace = True)
@@ -87,8 +89,8 @@ def loop_data():
             top_whale_sellers = top_whale_sellers[0:100]
             flat_list = find_all_loops(top_whale_sellers, transactions_df)
             with open('list_of_dodgy_transactions/' + name +
-                '.pkl', 'wb') as handle:
-                    pickle.dump(flat_list, handle)
+                '.pkl', 'wb') as f:
+                    pickle.dump(flat_list, f)
                     print("Created")
             print(flat_list)
 
@@ -98,6 +100,85 @@ def loop_data():
 # will be the same
 # loop_data()
 
-with open('list_of_dodgy_transactions/boredape.pkl', 'rb') as f:
-    bored_ape_list = pickle.load(f)
-    print(bored_ape_list)
+
+#once list of dodgy transactions created, transactions need to be filtered to make sure they all occur within a month 
+# also need to translate into a node graph
+def transaction_hashes_to_node_graph(dodgy_transaction_hash_list, transactions_df):
+    # filter for start loop
+    start_loop = 'start loop'
+    # filter to only include transactions which match the transaction hash list 
+    loop_transactions = []
+    buyers_and_sellers = []
+    for transaction_hash in dodgy_transaction_hash_list:
+        if transaction_hash != start_loop:
+            transaction = transactions_df.loc[transactions_df['transactionhash'] == transaction_hash]
+            # print(transaction)
+            loop_transactions.append(transaction)
+            buyers_and_sellers.append(list(transaction.fromaddress)[0])
+            buyers_and_sellers.append(list(transaction.toaddress)[0])    
+    buyers_and_sellers = list(dict.fromkeys(buyers_and_sellers))
+    return loop_transactions, buyers_and_sellers
+
+
+
+
+
+# copied and pasted from create node graph v2
+def create_json_of_node_data(whale_transactions, intersection, jsn_output_name):    
+    whale_transactions = pd.concat(whale_transactions)
+    f = open(jsn_output_name, 'w')
+    f.write("[\n")
+    for sellers_id in intersection:
+        name_of_seller = find_wallet_name(sellers_id)
+        f.write('{"name":"transactions.' + name_of_seller + '","size":1,"imports":[')
+        begin = True
+        for index, row in whale_transactions.iterrows():
+            if(row.fromaddress == name_of_seller):
+                name_of_buyer = row.toaddress
+                if(begin):
+                    f.write('"transactions.' + name_of_buyer + '"')
+                    begin = False
+                else:
+                    f.write(',"transactions.' + name_of_buyer + '"')
+        f.write(']},\n')
+    f.write("]")
+
+def find_wallet_name(name):
+    return name
+    # web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
+    # ns = ENS.fromWeb3(web3)
+    # try:
+    #     wallet_name = ns.name(name)
+    #     if(wallet_name == None):
+    #         wallet_name = name
+    #     else:
+    #         wallet_name = wallet_name.replace(".", "_")
+    # except:
+    #     wallet_name = name
+    #     print("error")
+    # return wallet_name
+
+
+
+
+
+
+
+
+def create_loops():
+    collection_dict = retrieve_all_pickles_into_dict()
+    for name, collection in collection_dict.items():
+        try:
+            if(collection == None):
+                return
+            transactions_df = collection.transactions_df
+            print(name)
+            with open('list_of_dodgy_transactions/' + name +
+                '.pkl', 'rb') as f:
+                bored_ape_list = pickle.load(f)
+            whale_transactions, intersection = transaction_hashes_to_node_graph(bored_ape_list, transactions_df)
+            create_json_of_node_data(whale_transactions, intersection, 'loop_graph_json/' + name + '_loop_graph.json')
+        except:
+            print("No data")
+            print(name)
+create_loops()
