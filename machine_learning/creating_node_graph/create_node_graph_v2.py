@@ -1,8 +1,8 @@
 import numpy as np
 from numpy import genfromtxt
 import pandas as pd
-# from ens import ENS 
-# from web3 import Web3
+from ens import ENS 
+from web3 import Web3
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
@@ -20,7 +20,7 @@ sys.path.insert(0, parentdir1)
 from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
 
 
-def create_node_graph_data(transactions_df, jsn_output_name):
+def create_node_graph_data(transactions_df):
     transactions_df.sort_values("running_whale_weight", ascending = False, inplace = True)
     top_transactions = transactions_df['fromaddress'].unique()
     top_transactions = top_transactions[0:200]
@@ -54,20 +54,22 @@ def create_node_graph_data(transactions_df, jsn_output_name):
     intersection = np.union1d(intersection_buyers, intersection_sellers)
 
     print(intersection.shape)
-    # 
     for line_number, (index, row) in enumerate(transactions_df.iterrows()):
         if ((row.fromaddress in intersection) and (row.toaddress in intersection)):
             whale_transactions.append(transactions_df.iloc[[line_number]])
-    
+
+    return whale_transactions, intersection
+
+def create_json_of_node_data(whale_transactions, intersection, jsn_output_name):    
     whale_transactions = pd.concat(whale_transactions)
     f = open(jsn_output_name, 'w')
     f.write("[\n")
     for sellers_id in intersection:
-        # name_of_seller = find_wallet_name(sellers_id)
-        f.write('{"name":"transactions.' + sellers_id + '","size":1,"imports":[')
+        name_of_seller = find_wallet_name(sellers_id)
+        f.write('{"name":"transactions.' + name_of_seller + '","size":1,"imports":[')
         begin = True
         for index, row in whale_transactions.iterrows():
-            if(row.fromaddress == sellers_id):
+            if(row.fromaddress == name_of_seller):
                 name_of_buyer = row.toaddress
                 if(begin):
                     f.write('"transactions.' + name_of_buyer + '"')
@@ -84,5 +86,25 @@ def node_data():
             transactions_df = collection.transactions_df
             print(name)
             # print(transactions_df)
-            create_node_graph_data(transactions_df, 'node_graph_json/' + name + '_node_graph.json')
+            whale_transactions, intersection = create_node_graph_data(transactions_df)
+            create_json_of_node_data(whale_transactions, intersection, 'node_graph_json/' + name + '_node_graph.json')
+            # create_node_graph_data(transactions_df, 'node_graph_json/' + name + '_node_graph.json')
+
+def find_wallet_name(name):
+    web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
+    ns = ENS.fromWeb3(web3)
+    try:
+        wallet_name = ns.name(name)
+        if(wallet_name == None):
+            wallet_name = name
+        else:
+            wallet_name = wallet_name.replace(".", "_")
+    except:
+        wallet_name = name
+        print("error")
+    return wallet_name
+
+
+
 node_data()
+
