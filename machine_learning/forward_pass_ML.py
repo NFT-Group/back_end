@@ -39,6 +39,10 @@ def find_price_predictor_from_tokenid(request):
     data_for_input_json = data_for_input_json.drop(['NameOfCollection', 'ethprice', 'tokenID'], axis=1)
     data_for_input_json['timestamp'] = 0
 
+
+    print(data_for_input)
+    print(data_for_input_json)
+
     predicted_price = loaded_model.predict(data_for_input_json)
 
     # firebase_admin.delete_app(default_app) # there will DEFINITELY be a better way of doing this!!
@@ -61,4 +65,4 @@ def find_price_predictor_from_tokenid(request):
 
 request = {"collection":"boredape","tokenid":"1000"}
 predicted_price, ipfs, trait_list = find_price_predictor_from_tokenid(request)
-print(predicted_price, ipfs, trait_list)
+# print(predicted_price, ipfs, trait_list)

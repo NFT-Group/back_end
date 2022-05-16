@@ -4,7 +4,7 @@ import pathlib
 from retrieve_collections_from_pkl import retrieve_certain_collection
 
 
-cred_pull_tokens_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_all_tokens_store.json'
+cred_pull_tokens_key = str(pathlib.Path(__file__).resolve().parents[1]) + '/database_store_keys/key_for_all_tokens_store.json'
 cred_pull_tokens = firebase_admin.credentials.Certificate(cred_pull_tokens_key)
 tokens_app = firebase_admin.initialize_app(cred_pull_tokens, {
     'databaseURL':'https://alltokens-8ff48-default-rtdb.europe-west1.firebasedatabase.app/'
