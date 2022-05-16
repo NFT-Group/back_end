@@ -19,110 +19,124 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir1 = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir1) 
 
-from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
-
-def create_sus_transactions_from_loops(transactions_df, jsn_output_name, pickle_whale_loops):
-    transactions = transactions_df #pd.read_pickle(pkl_file_name)
-    transactions.sort_values("running_whale_weight", ascending = False, inplace = True)
-    top_transactions = transactions['fromaddress'].unique()
-
-    top_transactions = top_transactions[0:200]
-
-    buyers_from_top_seller_list = []
-
-
-    for seller_id in top_transactions:
-        temp = transactions.loc[transactions['fromaddress'] == seller_id, 'toaddress']
-        buyers_from_top_seller_list.append(temp.tolist())
-
-
-    buyers_from_top_seller_list = [address for sublist in buyers_from_top_seller_list for address in sublist]
-    df = pd.DataFrame(buyers_from_top_seller_list)
-
-    df.to_csv('shows.csv')    
-    intersection = np.intersect1d(top_transactions, buyers_from_top_seller_list)
-    # collection_data = ref.order_b
-    whale_transactions = []
-
-    for line_number, (index, row) in enumerate(transactions.iterrows()):
-        if ((row.fromaddress in intersection) and (row.toaddress in intersection)):
-            whale_transactions.append(transactions.iloc[[line_number]])
-
-    whale_transactions = pd.concat(whale_transactions)
-    f = open(jsn_output_name, 'w')
-    f.write("[\n")
-    counter = 0
-    counter2 = 0
-    with open (pickle_whale_loops, 'rb') as fp:
-        transaction_list1 = pickle.load(fp)
-    for sellers_id in intersection:
-        name_of_seller = find_wallet_name(sellers_id)
-        f.write('{"name":"transactions.' + name_of_seller + '","size":1,"imports":[')
-        begin = True
-        for index, row in whale_transactions.iterrows():
-            counter2 += 1
-            if(row.fromaddress == sellers_id):
-                if(row.transactionhash in transaction_list1):
-                    print(row.transactionhash)
-                    name_of_buyer = find_wallet_name(row.toaddress)
-                    if(begin):
-                        f.write('"transactions.' + name_of_buyer + '"')
-                        counter = counter + 1
-                        begin = False
-                    else:
-                        f.write(',"transactions.' + name_of_buyer + '"')
-                        counter = counter + 1
-        f.write(']},\n')
-    f.write("]")
-
-
-def find_wallet_name(name):
-    # web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
-    # ns = ENS.fromWeb3(web3)
-    # try:
-    #     wallet_name = ns.name(name)
-    #     if(wallet_name == None):
-    #         wallet_name = name
-    #     else:
-    #         wallet_name = wallet_name.replace(".", "_")
-    # except:
-    #     wallet_name = name
-    #     print("error")
-    return name #wallet_name
+# from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
+# from create_node_graph_v2.py import create_node_graph_data
+# from create_node_graph_v2.py import create_json_of_node_data
 
 
 
-apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
-# cryptoPunkMDAddress = '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2'
-doodlesAddress = '0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e'
-coolCatsAddress = '0x1a92f7381b9f03921564a437210bb9396471050c'
-cryptoPunkAddress = '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB'
-cryptoKittiesAddress = '0x06012c8cf97bead5deae237070f9587f8e7a266d'
-cloneXAddress = '0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B'
-crypToadzAddress = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
-boredApeKennelAddress = '0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623'
-pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
-
-collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodlesAddress,
-        "coolCatsAddress": coolCatsAddress,
-        "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
-        "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
+print("hello")
 
 
 
 
 
-# Aiming to take list of loop transactions
 
-def node_data():
-    collection_dict = retrieve_all_pickles_into_dict()
-    for name, collection in collection_dict.items():
-        if(collection != None):
-            transactions_df = collection.transactions_df
-            print(name)
-            create_sus_transactions_from_loops(transactions_df, "loop_graph_json/" + name + "_loops.json", "pkl_loop_dump/" + name + "_loops.pkl")
 
-node_data()
+
+
+# def create_sus_transactions_from_loops(transactions_df, jsn_output_name, pickle_whale_loops):
+#     transactions = transactions_df #pd.read_pickle(pkl_file_name)
+#     transactions.sort_values("running_whale_weight", ascending = False, inplace = True)
+#     top_transactions = transactions['fromaddress'].unique()
+
+#     top_transactions = top_transactions[0:200]
+
+#     buyers_from_top_seller_list = []
+
+
+#     for seller_id in top_transactions:
+#         temp = transactions.loc[transactions['fromaddress'] == seller_id, 'toaddress']
+#         buyers_from_top_seller_list.append(temp.tolist())
+
+
+#     buyers_from_top_seller_list = [address for sublist in buyers_from_top_seller_list for address in sublist]
+#     df = pd.DataFrame(buyers_from_top_seller_list)
+
+#     # df.to_csv('shows.csv')    
+#     intersection = np.intersect1d(top_transactions, buyers_from_top_seller_list)
+#     # collection_data = ref.order_b
+#     whale_transactions = []
+
+#     for line_number, (index, row) in enumerate(transactions.iterrows()):
+#         if ((row.fromaddress in intersection) and (row.toaddress in intersection)):
+#             whale_transactions.append(transactions.iloc[[line_number]])
+
+#     whale_transactions = pd.concat(whale_transactions)
+#     f = open(jsn_output_name, 'w')
+#     f.write("[\n")
+#     counter = 0
+#     counter2 = 0
+#     with open (pickle_whale_loops, 'rb') as fp:
+#         transaction_list1 = pickle.load(fp)
+#     for sellers_id in intersection:
+#         name_of_seller = find_wallet_name(sellers_id)
+#         f.write('{"name":"transactions.' + name_of_seller + '","size":1,"imports":[')
+#         begin = True
+#         for index, row in whale_transactions.iterrows():
+#             counter2 += 1
+#             if(row.fromaddress == sellers_id):
+#                 if(row.transactionhash in transaction_list1):
+#                     print(row.transactionhash)
+#                     name_of_buyer = find_wallet_name(row.toaddress)
+#                     if(begin):
+#                         f.write('"transactions.' + name_of_buyer + '"')
+#                         counter = counter + 1
+#                         begin = False
+#                     else:
+#                         f.write(',"transactions.' + name_of_buyer + '"')
+#                         counter = counter + 1
+#         f.write(']},\n')
+#     f.write("]")
+
+
+# def find_wallet_name(name):
+#     # web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
+#     # ns = ENS.fromWeb3(web3)
+#     # try:
+#     #     wallet_name = ns.name(name)
+#     #     if(wallet_name == None):
+#     #         wallet_name = name
+#     #     else:
+#     #         wallet_name = wallet_name.replace(".", "_")
+#     # except:
+#     #     wallet_name = name
+#     #     print("error")
+#     return name #wallet_name
+
+
+
+# apeAddress = '0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D'
+# # cryptoPunkMDAddress = '0x16F5A35647D6F03D5D3da7b35409D65ba03aF3B2'
+# doodlesAddress = '0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e'
+# coolCatsAddress = '0x1a92f7381b9f03921564a437210bb9396471050c'
+# cryptoPunkAddress = '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB'
+# cryptoKittiesAddress = '0x06012c8cf97bead5deae237070f9587f8e7a266d'
+# cloneXAddress = '0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B'
+# crypToadzAddress = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
+# boredApeKennelAddress = '0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623'
+# pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
+
+# collection_addresses_dict = {'apeAddress': apeAddress, "doodlesAddress": doodlesAddress,
+#         "coolCatsAddress": coolCatsAddress,
+#         "cloneXAddress": cloneXAddress, "crypToadzAddress": crypToadzAddress,
+#         "boredApeKennelAddress": boredApeKennelAddress, "pudgyPenguinAddress": pudgyPenguinAddress}
+
+
+
+
+
+# # Aiming to take list of loop transactions
+
+# def node_data():
+#     collection_dict = retrieve_all_pickles_into_dict()
+#     for name, collection in collection_dict.items():
+#         if(collection != None):
+#             transactions_df = collection.transactions_df
+#             print(name)
+#             create_sus_transactions_from_loops(transactions_df, "loop_graph_json/" + name + "_loops.json", "pkl_loop_dump/" + name + "_loops.pkl")
+
+# node_data()
 
 # list_pkl_filename = ['boredape_loops.pkl', 'boredapekennel_loops.pkl', 'coolcat_loops.pkl', 'doodle_loops.pkl', 'clonex_loops.pkl', 'cryptoad_loops.pkl', 'penguin_loops.pkl']
 # list_json_output_name = ['bored_ape_yacht_club_loops.json', 'bored_ape_kennel_club_loops.json', 'cool_cats_loops.json', 'doodles_loops.json', 'clonex_loops.json', 'cryptoadz_loops.json', 'pudgy_penguins_loops.json']
