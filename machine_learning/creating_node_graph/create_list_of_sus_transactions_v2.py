@@ -86,7 +86,7 @@ def loop_data():
             print(name)
             transactions_df.sort_values("running_whale_weight", ascending = False, inplace = True)
             top_whale_sellers = transactions_df['fromaddress'].unique()
-            top_whale_sellers = top_whale_sellers[0:100]
+            top_whale_sellers = top_whale_sellers[0:400]
             flat_list = find_all_loops(top_whale_sellers, transactions_df)
             with open('list_of_dodgy_transactions/' + name +
                 '.pkl', 'wb') as f:
