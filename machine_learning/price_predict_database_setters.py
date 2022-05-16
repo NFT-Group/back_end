@@ -13,6 +13,12 @@ from ML_models_functions import random_forest_reg
 import pickle
 from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict, retrieve_certain_collection
 
+# the purpose of this file is create a reduced version of the transactions
+# dataframe which only carries the most recent transactions of each item.
+# In this way, we know the 'current' sell count and whale weight so that we
+# can accurately predict this price with our model. Once found, we set this
+# information to another database so that it can be queried when necessary
+
 cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
 cred_push = firebase_admin.credentials.Certificate(cred_push_key)
 default_app = firebase_admin.initialize_app(cred_push, {

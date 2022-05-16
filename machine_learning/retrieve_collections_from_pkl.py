@@ -1,6 +1,5 @@
 import pickle
 import pathlib
-# from collection_class import Collection
 
 list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
 

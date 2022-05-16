@@ -8,6 +8,11 @@ from firebase_admin import db
 import numpy as np
 import json
 
+# the purpose of this file is to receive a request of a token id and collection
+# name from the website, format the appropriate parameters to query a 'what
+# would this item sell for now?' question, and return the price, link to image,
+# and breakdown of which traits influenced the price
+
 def find_price_predictor_from_tokenid(request):
     cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
     cred_push = firebase_admin.credentials.Certificate(cred_push_key)
@@ -19,9 +24,8 @@ def find_price_predictor_from_tokenid(request):
     collection_name = request['collection']
     tokenID = request['tokenid']
 
-    # find model - THIS WILL LIKELY NEED TO BE CHANGED
+    # find model
     filename = str(pathlib.Path(__file__).parent.resolve()) + '/ML_models/random_forests/' + collection_name + "_RF.pkl"
-
     loaded_model = pickle.load(open(filename, 'rb'))
 
     # find input
@@ -30,9 +34,7 @@ def find_price_predictor_from_tokenid(request):
     data_for_input = ref.get()
 
     # format input 
-    print(data_for_input)
     data_for_input_json = DataFrame([data_for_input])
-    print(data_for_input_json)
     data_for_input_json = data_for_input_json.drop(['NameOfCollection', 'ethprice', 'tokenID'], axis=1)
     data_for_input_json['timestamp'] = 0
 
@@ -54,8 +56,6 @@ def find_price_predictor_from_tokenid(request):
     predicted_price = np.array2string(*predicted_price)
     response = '{"price":"' + predicted_price + '"},{"ipfs":' + ipfs + '},{"attributes":' + str(trait_list_json)
     
-    print(response)
-
     return predicted_price, ipfs, trait_list
 
 request = {"collection":"boredape","tokenid":"1000"}
