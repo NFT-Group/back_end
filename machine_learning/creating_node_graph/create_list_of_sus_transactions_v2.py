@@ -20,8 +20,6 @@ parentdir1 = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir1) 
 
 from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict
-from create_node_graph_v2 import create_json_of_node_data
-
 
 
 print("hello")
@@ -66,8 +64,8 @@ def find_all_buyers(transactions_df, whale_address, target_address, list_of_addr
         return False
     for i in range(len(list_of_buyers)):
         if (list_of_buyers[i] == target_address):
+            list_of_addresses_in_loop.append("start loop")
             list_of_addresses_in_loop.append(list_of_transactions[i])
-            list_of_addresses_in_loop.append("end loop")
             return True
         elif(find_all_buyers(transactions_df, list_of_buyers[i], target_address, list_of_addresses_in_loop, count)):
             list_of_addresses_in_loop.append(list_of_transactions[i])
@@ -95,6 +93,9 @@ def loop_data():
             print(flat_list)
 
 
+# This will rerun all of the loop data - creating a list of transaction hashes of dodgy transactions (loops), 
+# where the "to address" in the first transaction after 'start loop' and the 'from address' in the last transaction hash
+# will be the same
 # loop_data()
 
 with open('list_of_dodgy_transactions/boredape.pkl', 'rb') as f:
