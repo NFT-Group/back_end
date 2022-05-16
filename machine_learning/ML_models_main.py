@@ -17,15 +17,11 @@ for name in list_of_names:
     except:
         continue
 
-
     x = preprocessed_df.drop(['ethprice', 'tokenID'], axis=1)
     if(name == 'cryptoad'):
         x = x.drop(['# Traits'], axis =1)
     x = x.sort_index(axis=1, ascending=True) # IMPORTANT LINE TO ENSURE LINEUP
     y = preprocessed_df['ethprice']
-    print(x)
-    print("hellO")
-    print(y)
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.10, shuffle=True)
     y_pred, y_test, model = random_forest_reg(x_train, x_test, y_train, y_test)
     analyse_results(y_pred, y_test, name)
