@@ -92,24 +92,19 @@ def prep_all_collection_data(list_of_names, collection_address_dict):
                 pickle.dump(collection, handle)
     return collection_dict
 
-# collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
+collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
 
-# for name, collection in collection_dict.items():
-#     with open(str(pathlib.Path(__file__).parent.resolve()) + 
-#         '/collections_pkl_folder/' + name +
-#         '_collection_class.pkl', 'wb') as handle:
-#             pickle.dump(collection, handle)
+for name, collection in collection_dict.items():
+    with open(str(pathlib.Path(__file__).parent.resolve()) + 
+        '/collections_pkl_folder/' + name +
+        '_collection_class.pkl', 'wb') as handle:
+            pickle.dump(collection, handle)
 
-boredapes = prep_individual_collection_data(apeAddress, 'boredape', 'boredapekennel')
-with open(str(pathlib.Path(__file__).parent.resolve()) + 
-            '/collections_pkl_folder/' + 'boredape' +
-            '_collection_class.pkl', 'wb') as handle:
-                pickle.dump(boredapes, handle)
+# boredapes = prep_individual_collection_data(apeAddress, 'boredape', 'boredapekennel')
+# with open(str(pathlib.Path(__file__).parent.resolve()) + 
+#             '/collections_pkl_folder/' + 'boredape' +
+#             '_collection_class.pkl', 'wb') as handle:
+#                 pickle.dump(boredapes, handle)
 
-penguin = prep_individual_collection_data(pudgyPenguinAddress, 'penguin', 'punk')
-with open(str(pathlib.Path(__file__).parent.resolve()) + 
-            '/collections_pkl_folder/' + 'penguin' +
-            '_collection_class.pkl', 'wb') as handle:
-                pickle.dump(penguin, handle)
 # punks = prep_individual_collection_data(cryptoPunkAddress, 'punk', None)
 
