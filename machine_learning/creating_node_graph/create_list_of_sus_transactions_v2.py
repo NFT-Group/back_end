@@ -98,7 +98,7 @@ def loop_data():
 # This will rerun all of the loop data - creating a list of transaction hashes of dodgy transactions (loops), 
 # where the "to address" in the first transaction after 'start loop' and the 'from address' in the last transaction hash
 # will be the same
-# loop_data()
+loop_data()
 
 
 #once list of dodgy transactions created, transactions need to be filtered to make sure they all occur within a month 
