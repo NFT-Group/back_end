@@ -9,6 +9,10 @@ from datetime import datetime
 import time
 import calendar
 
+# this class takes a lot of responsibilty for the functionality of the program -
+# from taking information off the firebase, to manipulating it in various ways
+# for ML models, to identifying the relevant 'whales' within each collection
+
 class Collection:
 
     def __init__(self, collection_name, og_token_data, og_trans_data):
@@ -30,12 +34,12 @@ class Collection:
         self.trait_header_list_mod.insert(0, 'tokenID')
         self.trait_header_list_mod.append('NumOfTraits')
 
-        # format a couple dataframes
+        # format dataframes
         self.tokens_df = pd.DataFrame(
             self.trait_values_distribution, columns = self.trait_header_list_mod)
         self.transactions_df = pd.DataFrame(
             self.transactions_values, columns = self.transactions_keys)
-        self.transactions_df = self.remove_garbage_values(self.transactions_df)
+        self.transactions_df = remove_garbage_values(self.transactions_df)
 
         # add derived information for ML
         self.add_sell_count()
@@ -52,19 +56,11 @@ class Collection:
             left_on='tokenID', 
             right_on='tokenid', 
             how='inner')
-        # print(self.prepped_df)
-
 
         # preprocess said megaframe for ML goodness
         # the goodness will be inputted into self.preprocessed_df
         self.preprocess()
         # print(self.preprocessed_df)
-
-        # self.preprocessed_df.to_pickle("apes_preprocessed_df.pkl")
-
-        # self.transactions_df.to_pickle("transactions_df.pkl")
-        # self.tokens_df.to_pickle("tokens_df.pkl")
-
 
     def split_data(self, og_token_data):
         # initial split of data from an OrderedDict into two lists
@@ -220,9 +216,14 @@ class Collection:
         self.trait_values_distribution = trait_values_distribution
 
     def add_whale_distribution(self):
+        
+        # since there is no definitive list of 'whales' within the NFT space
+        # or even particular collections, we identified them ourselves with
+        # this function.
+        # In it, we identify whales by first identifying who owns NFTs at
+        # the end of our historical transactions, then reverse engineering their
+        # distribution by tracking trades back through time.
 
-        ''' FIND THE CURRENT DISTRUBUTION OF OWNERS I.E., FINAL TRANSACTIONS
-        OF OF EVERY NFT INDEX '''
 
         final_owners_list = self.transactions_df['tokenid'].unique()
         unique_id_array = np.empty((len(final_owners_list), 3), dtype=object)
@@ -238,20 +239,12 @@ class Collection:
                         self.transactions_df.index[row], 'toaddress']
                     break
 
-
-        # frequency_of_sellers = find_frequency_of_value(unique_id_array[:,1])
         frequency_of_buyers = find_frequency_of_value(unique_id_array[:,2])
-        # frequency_of_purchases = find_frequency_of_value(unique_id_array[:,0])
-
-        # sorted_final_sellers = {k: v for k, v in sorted(
-        #     frequency_of_sellers.items(), key = lambda item: item[1])}
         sorted_final_buyers = {k: v for k, v in sorted(
             frequency_of_buyers.items(), key = lambda item: item[1])}
-        # sorted_final_purchases = {k: v for k, v in sorted(
-        #     frequency_of_purchases.items(), key = lambda item: item[1])}
 
-        ''' INTIIALISE THE FINAL DISTRIBUTION IN THE DICTIONARY FOR BUYERS
-        AND SELLERS AND REVERSE ENGINEER THE INITIAL DISTRIBUTION WITH IT'''
+        # initialise the final distribution in the dictionary for buyers
+        # and sellers and reverse engineer the initial distribution with it
 
         reverse_transaction_data = self.transactions_df.iloc[::-1]
         initial_reverse_buyers = sorted_final_buyers
@@ -274,9 +267,9 @@ class Collection:
             except KeyError:
                 continue
 
-        ''' INTIALISE STARTING SELLER OWNERSHIP WITH REVERSE ENGINEERED DATA
-        AND THEN CREATE ARRAY OF 'CURRENT SELLER WEIGHT', UPDATED
-        AFTER EACH TRANSACTION '''
+        # initialise starting seller ownership with reverse engineered data
+        # and then create array of 'current seller weight', updated after
+        # each transaction
 
         seller_current_weight = np.zeros([self.transactions_df.shape[0], 1], dtype=int)
 
@@ -292,6 +285,10 @@ class Collection:
             except KeyError:
                 continue
 
+        # by the end of the function we have a 'running whale weight' column
+        # which represents (to the best available knowledge) how many NFTs 
+        # within this collection a seller owned at the time of sale
+
         self.transactions_df = self.transactions_df.assign(
             running_whale_weight = self.sell_count_array.tolist())   
 
@@ -305,7 +302,8 @@ class Collection:
 
     def preprocess(self):
 
-        self.preprocessed_df = self.remove_garbage_values(self.prepped_df)
+        # REMOVE GARBAGE VALUES
+        self.preprocessed_df = remove_garbage_values(self.prepped_df)
 
         # REMOVE COLUMNS WHICH WON'T BE USED IN PRICE PREDICTION
         self.preprocessed_df = self.preprocessed_df.drop([
@@ -316,6 +314,7 @@ class Collection:
             'blocknumber',
             'contracthash',
             ], axis=1)
+
 
         # PREP AN ALTERNATIVE DATAFRAME WHICH WILL BE USED FOR RETRIEVING
         # INSTANCES OF NFTS FROM THE WEBSITE FOR THE ML MODELS
@@ -331,7 +330,8 @@ class Collection:
                 ['tokenid'], axis=1)
         self.price_predict_archive_df.fillna(0, inplace=True)
         
-    
+        # add an additional column for relative time between transactions for
+        # use in the ML model
         self.preprocessed_df = self.preprocessed_df.drop(['tokenid'], axis=1)
         now = datetime.now()
         self.preprocessed_df.timestamp = pd.to_datetime(
@@ -339,16 +339,7 @@ class Collection:
         self.preprocessed_df.timestamp = now - self.preprocessed_df.timestamp
         self.preprocessed_df.timestamp = self.preprocessed_df.timestamp.apply(
             lambda x: x.total_seconds())
-
-    def remove_garbage_values(self, dataframe):
-        # REMOVED ROWS WHICH HAVE GARBAGE VALUES
-        dataframe = dataframe[
-            dataframe.fromaddress != '0x0000000000000000000000000000000000000000']
-        dataframe = dataframe[
-            dataframe.ethprice != 0]
-
-        return dataframe
-
+        # self.preprocessed_df.timestamp = self._normalise(self.preprocessed_df.timestam)
 
 
     def _normalise(self, column):
@@ -359,3 +350,11 @@ class Collection:
         return normal_col  
 
 
+def remove_garbage_values(dataframe):
+    # REMOVED ROWS WHICH HAVE GARBAGE VALUES
+    new_dataframe = dataframe[
+        dataframe.fromaddress != '0x0000000000000000000000000000000000000000']
+    new_dataframe = new_dataframe[
+        new_dataframe.ethprice != 0]
+
+    return new_dataframe

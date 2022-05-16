@@ -14,17 +14,23 @@ doodlesAddress = '0x8a90CAb2b38dba80c64b7734e58Ee1dB38B8992e'
 coolCatsAddressArchive = '0x1a92f7381b9f03921564a437210bb9396471050c'
 coolCatsAddress = '0x1A92f7381B9F03921564a437210bB9396471050C'
 cryptoPunkAddress = '0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB'
-# cryptoKittiesAddress = '0x06012c8cf97bead5deae237070f9587f8e7a266d'
 cloneXAddress = '0x49cF6f5d44E70224e2E23fDcdd2C053F30aDA28B'
 crypToadzAddress = '0x1CB1A5e65610AEFF2551A50f76a87a7d3fB649C6'
 boredApeKennelAddress = '0xba30E5F9Bb24caa003E9f2f0497Ad287FDF95623'
 pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
 
-#readd punks
-list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
+# the purpose of this file is to periodically update our Collection classes
+# when we have a sufficient amount of fresh data within the databases.
+# there are links set up to each of our three databases, we call constructors 
+# for the Collection class, and then we save the classes to pkl files so 
+# we don't have to run this computationally expensive function more than
+# strictly necessary
+
+# re-add punks later
+list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin"]
 collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress,
     "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress,
-    "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
+    "penguin": pudgyPenguinAddress}
 
 # CREATE LINK FOR 'FULL DATABASE'
 
@@ -58,7 +64,7 @@ def prep_individual_collection_data(address, collection_name, next_collection_na
         print("hi")
         collection_tokens = ref.order_by_key().start_at(collection_name).limit_to_first(1).get()
     else:
-        collection_tokens = ref.order_by_key().start_at(collection_name).end_at(next_collection_name).limit_to_first(1).get()
+        collection_tokens = ref.order_by_key().start_at(collection_name).end_at(next_collection_name).get()
     ref = db.reference('/', app=transactions_app)
     collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
     # print(collection_tokens)
@@ -80,6 +86,10 @@ def prep_all_collection_data(list_of_names, collection_address_dict):
         else:
             collection = prep_individual_collection_data(address, name, list_of_names[i+1])
         collection_dict.update({name: collection})
+        with open(str(pathlib.Path(__file__).parent.resolve()) + 
+            '/collections_pkl_folder/' + name +
+            '_collection_class.pkl', 'wb') as handle:
+                pickle.dump(collection, handle)
     return collection_dict
 
 collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
@@ -91,5 +101,9 @@ for name, collection in collection_dict.items():
             pickle.dump(collection, handle)
 
 # bored_apes = prep_individual_collection_data(apeAddress, 'boredape', 'boredapekennel')
+# with open(str(pathlib.Path(__file__).parent.resolve()) + 
+#             '/collections_pkl_folder/' + 'boredape' +
+#             '_collection_class.pkl', 'wb') as handle:
+#                 pickle.dump(bored_apes, handle)
 # punks = prep_individual_collection_data(cryptoPunkAddress, 'punk', None)
 

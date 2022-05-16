@@ -5,7 +5,7 @@ from analysis import analyse_results
 import pickle
 import pathlib
 
-list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
+list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin"]
 
 collection_dict = retrieve_all_pickles_into_dict()
 
