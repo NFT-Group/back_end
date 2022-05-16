@@ -14,7 +14,7 @@ import json
 # and breakdown of which traits influenced the price
 
 def find_price_predictor_from_tokenid(request):
-    cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
+    cred_push_key = str(pathlib.Path(__file__).resolve().parents[1]) + '/database_store_keys/key_for_ML-prepped-database.json'
     cred_push = firebase_admin.credentials.Certificate(cred_push_key)
     default_app = firebase_admin.initialize_app(cred_push, {
         'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
@@ -61,4 +61,4 @@ def find_price_predictor_from_tokenid(request):
 
 request = {"collection":"boredape","tokenid":"1000"}
 predicted_price, ipfs, trait_list = find_price_predictor_from_tokenid(request)
-# print(predicted_price, ipfs, trait_list)
+print(predicted_price, ipfs, trait_list)
