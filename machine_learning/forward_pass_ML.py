@@ -26,7 +26,6 @@ def find_price_predictor_from_tokenid(request):
     tokenID = request['tokenid']
 
     # find model
-    print("hiu")
     filename = str(pathlib.Path(__file__).parent.resolve()) + '/ML_models/random_forests/' + collection_name + "_RF.pkl"
     loaded_model = pickle.load(open(filename, 'rb'))
 
