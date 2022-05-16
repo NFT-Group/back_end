@@ -69,8 +69,8 @@ def create_json_of_node_data(whale_transactions, intersection, jsn_output_name):
         f.write('{"name":"transactions.' + name_of_seller + '","size":1,"imports":[')
         begin = True
         for index, row in whale_transactions.iterrows():
-            if(row.fromaddress == name_of_seller):
-                name_of_buyer = row.toaddress
+            if(row.fromaddress == sellers_id):
+                name_of_buyer = find_wallet_name(row.toaddress)
                 if(begin):
                     f.write('"transactions.' + name_of_buyer + '"')
                     begin = False

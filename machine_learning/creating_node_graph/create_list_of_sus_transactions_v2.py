@@ -86,7 +86,7 @@ def loop_data():
             print(name)
             transactions_df.sort_values("running_whale_weight", ascending = False, inplace = True)
             top_whale_sellers = transactions_df['fromaddress'].unique()
-            top_whale_sellers = top_whale_sellers[0:400]
+            top_whale_sellers = top_whale_sellers[0:200]
             flat_list = find_all_loops(top_whale_sellers, transactions_df)
             with open('list_of_dodgy_transactions/' + name +
                 '.pkl', 'wb') as f:
@@ -133,8 +133,8 @@ def create_json_of_node_data(whale_transactions, intersection, jsn_output_name):
         f.write('{"name":"transactions.' + name_of_seller + '","size":1,"imports":[')
         begin = True
         for index, row in whale_transactions.iterrows():
-            if(row.fromaddress == name_of_seller):
-                name_of_buyer = row.toaddress
+            if(row.fromaddress == sellers_id):
+                name_of_buyer = find_wallet_name(row.toaddress)
                 if(begin):
                     f.write('"transactions.' + name_of_buyer + '"')
                     begin = False
@@ -144,19 +144,19 @@ def create_json_of_node_data(whale_transactions, intersection, jsn_output_name):
     f.write("]")
 
 def find_wallet_name(name):
-    return name
-    # web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
-    # ns = ENS.fromWeb3(web3)
-    # try:
-    #     wallet_name = ns.name(name)
-    #     if(wallet_name == None):
-    #         wallet_name = name
-    #     else:
-    #         wallet_name = wallet_name.replace(".", "_")
-    # except:
-    #     wallet_name = name
-    #     print("error")
-    # return wallet_name
+    # return name
+    web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
+    ns = ENS.fromWeb3(web3)
+    try:
+        wallet_name = ns.name(name)
+        if(wallet_name == None):
+            wallet_name = name
+        else:
+            wallet_name = wallet_name.replace(".", "_")
+    except:
+        wallet_name = name
+        print("error")
+    return wallet_name
 
 
 
