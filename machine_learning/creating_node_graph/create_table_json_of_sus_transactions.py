@@ -71,6 +71,7 @@ def json_table_loops(df_loops):
         print(i)
         df_loops['fromaddress'][i] = find_wallet_name(df_loops['fromaddress'][i])
         df_loops['toaddress'][i] = find_wallet_name(df_loops['toaddress'][i])
+    df_loops.round(2)
     transactions_json = df_loops.to_json('loop_table_json/json_for_table_loops_all_collections.json', orient='records')
     transactions_csv = df_loops.to_csv('loop_table_json/out.csv')
     # print(transactions_json)
