@@ -19,7 +19,7 @@ from retrieve_collections_from_pkl import retrieve_all_pickles_into_dict, retrie
 # can accurately predict this price with our model. Once found, we set this
 # information to another database so that it can be queried when necessary
 
-cred_push_key = str(pathlib.Path(__file__).parent.resolve()) + '/database_store_keys/key_for_ML-prepped-database.json'
+cred_push_key = str(pathlib.Path(__file__).resolve().parents[1]) + '/database_store_keys/key_for_ML-prepped-database.json'
 cred_push = firebase_admin.credentials.Certificate(cred_push_key)
 default_app = firebase_admin.initialize_app(cred_push, {
     'databaseURL':'https://ml-prepped-database-default-rtdb.europe-west1.firebasedatabase.app/'
