@@ -1,8 +1,11 @@
-import firebase_admin 
-from firebase_admin import db
 import pathlib
 from retrieve_collections_from_pkl import retrieve_certain_collection
-
+import numpy as np 
+import pandas as pd
+from datetime import datetime
+import json
+import firebase_admin
+from firebase_admin import credentials, firestore, db
 
 cred_pull_tokens_key = str(pathlib.Path(__file__).resolve().parents[1]) + '/database_store_keys/key_for_all_tokens_store.json'
 cred_pull_tokens = firebase_admin.credentials.Certificate(cred_pull_tokens_key)
@@ -13,8 +16,11 @@ tokens_app = firebase_admin.initialize_app(cred_pull_tokens, {
 ref = db.reference('/')
 collection_tokens = ref.order_by_key().start_at('punk').get()
 # print(collection_tokens)
-
 collection_keys = list(collection_tokens.keys())
+
+def save_to_firebase_new(hash, dfjson):
+    ref = db.reference('/')
+    ref.child(hash).set(dfjson)
 
 MAGIC_DICTIONARY = dict({
 'Alien' : 'Type',
@@ -126,7 +132,28 @@ for i in collection_keys:
 
 # Type: Alien, Ape, Zombie, Female, Male
 
-print(new_collection)
+# print(new_collection['punk0'])
+
+# df_json = {"metadata":"{'attributes:' + str(new_collection['punk0']) + ',"image":"https://www.larvalabs.com/public/images/cryptopunks/punk0000.png"}","tokenid":"'+str(0)+'}'
+
+# recovery = {"metadata":"Female 2, Earring, Blonde Bob, Green Eye Shadow", "tokenid":0}
+# print(recovery)
+
+for i in range(10000):
+	name = "punk"+str(i)
+	four_digit_id = str(i)
+	while (len(four_digit_id) < 4):
+		four_digit_id = '0' + four_digit_id
+	df_json = {"metadata":{"attributes" : str(new_collection[name]) , "image":"https://www.larvalabs.com/public/images/cryptopunks/punk" + four_digit_id + ".png"}, "tokenid":i}
+	save_to_firebase_new(name, df_json)
+	#print(name)
+	#print(df_json)
+
+# print(df_json)
+
+# save_to_firebase_new('punk0', recovery)
+# save_to_firebase_new('punk0', df_json)
+# print("success")
 
 #bored_apes = retrieve_certain_collection('boredape')
 #print(bored_apes.trait_list_dict['100'])

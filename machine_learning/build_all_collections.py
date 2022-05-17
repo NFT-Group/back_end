@@ -27,10 +27,10 @@ pudgyPenguinAddress = '0xBd3531dA5CF5857e7CfAA92426877b022e612cf8'
 # strictly necessary
 
 # re-add punks later
-list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin"]
+list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
 collection_name_dict = {'boredape': apeAddress, "boredapekennel": boredApeKennelAddress, "clonex": cloneXAddress,
     "coolcat": coolCatsAddress, "cryptoad": crypToadzAddress, "doodle": doodlesAddress,
-    "penguin": pudgyPenguinAddress}
+    "penguin": pudgyPenguinAddress, "punk": cryptoPunkAddress}
 
 # CREATE LINK FOR 'FULL DATABASE'
 
@@ -62,13 +62,13 @@ def prep_individual_collection_data(address, collection_name, next_collection_na
     if (next_collection_name == None):
         # return
         print("hi")
-        collection_tokens = ref.order_by_key().start_at(collection_name).limit_to_first(1).get()
+        collection_tokens = ref.order_by_key().start_at(collection_name).get()
     else:
         collection_tokens = ref.order_by_key().start_at(collection_name).end_at(next_collection_name).get()
     ref = db.reference('/', app=transactions_app)
     collection_trans = ref.order_by_child('contracthash').equal_to(address).get()
     # print(collection_tokens)
-    print(collection_tokens)
+    # print(collection_tokens)
     collection = Collection(collection_name, collection_tokens, collection_trans)
     collection.prep_data()
     if collection_name == 'cryptoad':
@@ -92,19 +92,23 @@ def prep_all_collection_data(list_of_names, collection_address_dict):
                 pickle.dump(collection, handle)
     return collection_dict
 
-collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
+# collection_dict = prep_all_collection_data(list_of_names, collection_name_dict)
+# 
+# for name, collection in collection_dict.items():
+    # with open(str(pathlib.Path(__file__).parent.resolve()) + 
+        # '/collections_pkl_folder/' + name +
+        # '_collection_class.pkl', 'wb') as handle:
+            # pickle.dump(collection, handle)
 
-for name, collection in collection_dict.items():
-    with open(str(pathlib.Path(__file__).parent.resolve()) + 
-        '/collections_pkl_folder/' + name +
-        '_collection_class.pkl', 'wb') as handle:
-            pickle.dump(collection, handle)
+punks = prep_individual_collection_data(cryptoPunkAddress, 'punk', None)
 
-# boredapes = prep_individual_collection_data(apeAddress, 'boredape', 'boredapekennel')
-# with open(str(pathlib.Path(__file__).parent.resolve()) + 
-#             '/collections_pkl_folder/' + 'boredape' +
-#             '_collection_class.pkl', 'wb') as handle:
-#                 pickle.dump(boredapes, handle)
+# print(punks.preprocessed_df)
+# apes = prep_individual_collection_data(apeAddress, 'boredape', 'boredapekennel')
+# print(punks.preprocessed_df)
+with open(str(pathlib.Path(__file__).parent.resolve()) + 
+            '/collections_pkl_folder/' + 'punk' +
+            '_collection_class.pkl', 'wb') as handle:
+                pickle.dump(punks, handle)
 
 # punks = prep_individual_collection_data(cryptoPunkAddress, 'punk', None)
 

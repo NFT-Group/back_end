@@ -12,7 +12,7 @@ from analysis import analyse_results
 import numpy as np
 import json
 
-list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin"]
+list_of_names = ["boredape", "boredapekennel", "clonex", "coolcat", "cryptoad", "doodle", "penguin", "punk"]
 
 def retrieve_collection_dodgies(name):
     with open(str(pathlib.Path(__file__).parent.resolve()) + 

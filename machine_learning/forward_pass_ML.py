@@ -31,6 +31,7 @@ def find_price_predictor_from_tokenid(request):
 
     # find input
     nft_string = collection_name+tokenID
+    print(tokenID)
     ref = db.reference(nft_string)
     data_for_input = ref.get()
 
@@ -48,21 +49,35 @@ def find_price_predictor_from_tokenid(request):
     # firebase_admin.delete_app(default_app) # there will DEFINITELY be a better way of doing this!!
     
     collection = retrieve_certain_collection(collection_name)
-    ipfs = collection.id_ipfs_dict[tokenID]
-    trait_list = collection.trait_list_dict[tokenID]
+    target_id = tokenID
+    target_index = None
+    for i in range (20000):
+        if collection.token_id_list[i] == str(target_id):
+            target_index = i
+            break
+    # print(collection.id_ipfs_dict)
+    #ipfs = collection.id_ipfs_dict[target_index]
+    print(collection.metadata_list[3])
+
+    trait_list = collection.trait_list_dict['100']
+    print("trait list:",trait_list)
     trait_list_json = json.loads(trait_list)
 
     for trait in trait_list_json:
         category = trait["trait_type"]
+        # print(collection.tokens_df['tokenID'])
+        # print(np.int64(tokenID))
         row = collection.tokens_df.loc[collection.tokens_df['tokenID'] == np.int64(tokenID)]
         specific_value = float(row[category])
         trait["rarity"] = specific_value
+
+    print(trait_list_json)
 
     predicted_price = np.array2string(*predicted_price)
     response = '{"price":"' + predicted_price + '"},{"ipfs":' + ipfs + '},{"attributes":' + str(trait_list_json)
     
     return predicted_price, ipfs, trait_list
 
-request = {"collection":"boredape","tokenid":"1000"}
+request = {"collection":"boredape","tokenid":"100"}
 predicted_price, ipfs, trait_list = find_price_predictor_from_tokenid(request)
 # print(predicted_price, ipfs, trait_list)

@@ -8,6 +8,7 @@ from find_frequency_of_values import find_frequency_of_value
 from datetime import datetime
 import time
 import calendar
+import ast
 
 # this class takes a lot of responsibilty for the functionality of the program -
 # from taking information off the firebase, to manipulating it in various ways
@@ -23,9 +24,10 @@ class Collection:
     def prep_data(self):
 
         # read in data from firebase into manageable formats
-        # if(self.collection_name == 'punk'):
-        #     self.split_punk_data()
-        self.split_data(self.og_token_data)
+        if(self.collection_name == 'punk'):
+            self.split_punk_data()
+        else:
+            self.split_data(self.og_token_data)
         self.get_raw_transaction_data(self.og_trans_data)
 
         # determine trait distribution
@@ -76,6 +78,8 @@ class Collection:
             metadata_temp = json.loads(metadata_temp)
             try:
                 metadata_temp2 = json.dumps(metadata_temp["attributes"])
+                # print(metadata_temp2)
+
                 ipfs_temp = json.dumps(metadata_temp["image"])
             except KeyError:
                 continue
@@ -86,7 +90,31 @@ class Collection:
         self.trait_list_dict = dict(zip(self.token_id_list, self.metadata_list))
         self.id_ipfs_dict = dict(zip(self.token_id_list, self.ipfs_link_list))
 
-    # def split_punk_data(self):
+    def split_punk_data(self):
+
+        self.token_id_list = []
+        self.metadata_list = []
+        self.ipfs_link_list = []
+
+        for id, meta in self.og_token_data.items():
+            id_temp = json.dumps(meta["tokenid"])
+            metadata_temp = json.dumps(meta["metadata"])
+            metadata_temp = metadata_temp.replace("\\","")[1:-1]
+            metadata_temp = "{" + metadata_temp + "}"
+            metadata_temp = json.loads(metadata_temp)
+            try:
+                metadata_temp2 = json.dumps(metadata_temp["attributes"])
+                metadata_temp2 = metadata_temp2[1:-1]
+                # print(metadata_temp2)
+                ipfs_temp = json.dumps(metadata_temp["image"])
+            except KeyError:
+                continue
+            self.token_id_list.append(id_temp)
+            self.metadata_list.append(metadata_temp2)  
+            self.ipfs_link_list.append(ipfs_temp)
+
+        self.trait_list_dict = dict(zip(self.token_id_list, self.metadata_list))
+        self.id_ipfs_dict = dict(zip(self.token_id_list, self.ipfs_link_list))
 
 
     def get_raw_transaction_data(self, og_trans_data):
@@ -136,10 +164,21 @@ class Collection:
             len(self.token_id_list), 1])
         traitList = []
 
+        if(self.collection_name == 'punk'):
+            print("\n")
+            self.metadata_list = list(str(self.metadata_list).replace("'","\""))
+            self.metadata_list = ''.join(self.metadata_list)
+            self.metadata_list = self.metadata_list.replace("\"[", "'[")
+            self.metadata_list = self.metadata_list.replace("]\"", "]'")
+            self.metadata_list = ast.literal_eval(self.metadata_list)
+
+
+
         # converting json formatted description of each NFTs traits into python
         # list format
         for i in range(len(self.id_list_np)):
             traitList.append(re.findall('"([^"]*)"', self.metadata_list[i]))
+        
 
         # json data is in format "Trait": TraitHeader : "Value" : value, we are only
         # interested in the trait header and the value of the header 
@@ -154,6 +193,7 @@ class Collection:
         # make the header list unique (using orderedlist to stop non-determinism)
         my_temp_set = OrderedSet(trait_header_list)
         unique_header_list = list(my_temp_set)
+        # print(unique_header_list[0:10])
 
         # create trait values which will create a numpy array of all the trait values
         # for the correct header e.g. 'gold hoop' within 'earing' header
@@ -169,7 +209,7 @@ class Collection:
                             except:
                                 trait_values_np[i,k] = "1"
 
-                            
+                           
         # get counts of how many traits each nft has
         number_of_traits = np.zeros([len(trait_values_np),1])
         for i in range(len(trait_values_np)):
