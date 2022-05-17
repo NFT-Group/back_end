@@ -1,8 +1,8 @@
 import numpy as np
 from numpy import genfromtxt
 import pandas as pd
-# from ens import ENS 
-# from web3 import Web3
+from ens import ENS 
+from web3 import Web3
 # import firebase_admin
 # from firebase_admin import credentials
 # from firebase_admin import db
@@ -157,26 +157,18 @@ def create_json_of_node_data(whale_transactions, intersection, jsn_output_name):
     f.write("]")
 
 def find_wallet_name(name):
-    return name
-    # web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
-    # ns = ENS.fromWeb3(web3)
-    # try:
-    #     wallet_name = ns.name(name)
-    #     if(wallet_name == None):
-    #         wallet_name = name
-    #     else:
-    #         wallet_name = wallet_name.replace(".", "_")
-    # except:
-    #     wallet_name = name
-    #     print("error")
-    # return wallet_name
-
-
-
-
-
-
-
+    web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
+    ns = ENS.fromWeb3(web3)
+    try:
+        wallet_name = ns.name(name)
+        if(wallet_name == None):
+            wallet_name = name
+        else:
+            wallet_name = wallet_name.replace(".", "_")
+    except:
+        wallet_name = name
+        print("error")
+    return wallet_name
 
 def create_loops():
     collection_dict = retrieve_all_pickles_into_dict()
@@ -190,7 +182,7 @@ def create_loops():
                 '.pkl', 'rb') as f:
                 bored_ape_list = pickle.load(f)
             whale_transactions, intersection = transaction_hashes_to_node_graph(bored_ape_list, transactions_df)
-            # create_json_of_node_data(whale_transactions, intersection, 'loop_graph_json/' + name + '_loop_graph.json')
+            create_json_of_node_data(whale_transactions, intersection, 'loop_graph_json/' + name + '_loop_graph.json')
         except:
             print("No data")
             print(name)
@@ -199,6 +191,5 @@ if __name__ == '__main__':
     # This will rerun all of the loop data - creating a list of transaction hashes of dodgy transactions (loops), 
     # where the "to address" in the first transaction after 'start loop' and the 'from address' in the last transaction hash
     # will be the same
-    
-    loop_data() # PUT IN TO RERUN ALL LOOP DATA
+    # loop_data() # PUT IN TO RERUN ALL LOOP DATA
     create_loops()
