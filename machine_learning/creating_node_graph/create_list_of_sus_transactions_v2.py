@@ -1,11 +1,11 @@
 import numpy as np
 from numpy import genfromtxt
 import pandas as pd
-from ens import ENS 
-from web3 import Web3
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import db
+# from ens import ENS 
+# from web3 import Web3
+# import firebase_admin
+# from firebase_admin import credentials
+# from firebase_admin import db
 import pickle
 # from trait_distribution import trait_distribution 
 import json
@@ -157,19 +157,19 @@ def create_json_of_node_data(whale_transactions, intersection, jsn_output_name):
     f.write("]")
 
 def find_wallet_name(name):
-    # return name
-    web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
-    ns = ENS.fromWeb3(web3)
-    try:
-        wallet_name = ns.name(name)
-        if(wallet_name == None):
-            wallet_name = name
-        else:
-            wallet_name = wallet_name.replace(".", "_")
-    except:
-        wallet_name = name
-        print("error")
-    return wallet_name
+    return name
+    # web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
+    # ns = ENS.fromWeb3(web3)
+    # try:
+    #     wallet_name = ns.name(name)
+    #     if(wallet_name == None):
+    #         wallet_name = name
+    #     else:
+    #         wallet_name = wallet_name.replace(".", "_")
+    # except:
+    #     wallet_name = name
+    #     print("error")
+    # return wallet_name
 
 
 
@@ -200,5 +200,5 @@ if __name__ == '__main__':
     # where the "to address" in the first transaction after 'start loop' and the 'from address' in the last transaction hash
     # will be the same
     
-    # loop_data() # PUT IN TO RERUN ALL LOOP DATA
+    loop_data() # PUT IN TO RERUN ALL LOOP DATA
     create_loops()

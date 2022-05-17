@@ -1,8 +1,8 @@
 import numpy as np
 from numpy import genfromtxt
 import pandas as pd
-from ens import ENS 
-from web3 import Web3
+# from ens import ENS 
+# from web3 import Web3
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
@@ -91,18 +91,19 @@ def node_data():
             # create_node_graph_data(transactions_df, 'node_graph_json/' + name + '_node_graph.json')
 
 def find_wallet_name(name):
-    web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
-    ns = ENS.fromWeb3(web3)
-    try:
-        wallet_name = ns.name(name)
-        if(wallet_name == None):
-            wallet_name = name
-        else:
-            wallet_name = wallet_name.replace(".", "_")
-    except:
-        wallet_name = name
-        print("error")
-    return wallet_name
+    return name
+    # web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/28b465e090554529bb7913d0504a71bd'))
+    # ns = ENS.fromWeb3(web3)
+    # try:
+    #     wallet_name = ns.name(name)
+    #     if(wallet_name == None):
+    #         wallet_name = name
+    #     else:
+    #         wallet_name = wallet_name.replace(".", "_")
+    # except:
+    #     wallet_name = name
+    #     print("error")
+    # return wallet_name
 
 
 if __name__ == '__main__':
