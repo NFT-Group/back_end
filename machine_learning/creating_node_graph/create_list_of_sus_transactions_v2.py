@@ -34,30 +34,38 @@ print("hello")
 # get a list of the whales to look at - top 400 
 
 
+# put the timestamp into the first find all buyers 
+# check that the timestamp is within a month in both the 
+
 
 
 def find_all_loops(list_of_whales, transactions_df):
     dodgy_transactions_list = []
+    dodgy_transactions_list_time = []
     for whale_address in list_of_whales:
         list_of_addresses_in_loop = []
-        find_all_buyers(transactions_df, whale_address, whale_address, list_of_addresses_in_loop, 0)
+        list_of_timestamps_in_loop = []
+        find_all_buyers(transactions_df, whale_address, whale_address, list_of_addresses_in_loop, list_of_timestamps_in_loop, 0)
         if(len(list_of_addresses_in_loop) != 0):
             dodgy_transactions_list.append(list_of_addresses_in_loop)
+            dodgy_transactions_list_time.append(list_of_timestamps_in_loop)
             print(len(dodgy_transactions_list))
 
     flat_list = [item for sublist in dodgy_transactions_list for item in sublist]
-    return flat_list
+    flat_list_time = [item for sublist in dodgy_transactions_list_time for item in sublist]
+    return flat_list, flat_list_time
 
 
 
 # find all buyers of a seller, if a buyer is a target address return true and 
 # add seller address and whale address to the list of addresses 
-def find_all_buyers(transactions_df, whale_address, target_address, list_of_addresses_in_loop, count):
+def find_all_buyers(transactions_df, whale_address, target_address, list_of_addresses_in_loop, list_of_timestamps_in_loop, count):
     count = count + 1
     if(count > 3):
         return False
     list_of_buyers = (transactions_df.loc[transactions_df['fromaddress'] == whale_address, 'toaddress'])
     list_of_transactions = (transactions_df.loc[transactions_df['fromaddress'] == whale_address, 'transactionhash']).tolist()
+    list_of_timestamps = (transactions_df.loc[transactions_df['fromaddress'] == whale_address, 'timestamp']).tolist()
     list_of_buyers = list_of_buyers.tolist()
     found = False
     if(len(list_of_buyers) == 0):
@@ -65,10 +73,13 @@ def find_all_buyers(transactions_df, whale_address, target_address, list_of_addr
     for i in range(len(list_of_buyers)):
         if (list_of_buyers[i] == target_address):
             list_of_addresses_in_loop.append("start loop")
+            list_of_timestamps_in_loop.append("start loop")
             list_of_addresses_in_loop.append(list_of_transactions[i])
+            list_of_timestamps_in_loop.append(list_of_timestamps[i])
             return True
-        elif(find_all_buyers(transactions_df, list_of_buyers[i], target_address, list_of_addresses_in_loop, count)):
+        elif(find_all_buyers(transactions_df, list_of_buyers[i], target_address, list_of_addresses_in_loop, list_of_timestamps_in_loop, count)):
             list_of_addresses_in_loop.append(list_of_transactions[i])
+            list_of_timestamps_in_loop.append(list_of_timestamps[i])
             found = True
     if(found):
         return True
@@ -87,12 +98,17 @@ def loop_data():
             transactions_df.sort_values("running_whale_weight", ascending = False, inplace = True)
             top_whale_sellers = transactions_df['fromaddress'].unique()
             top_whale_sellers = top_whale_sellers[0:200]
-            flat_list = find_all_loops(top_whale_sellers, transactions_df)
+            flat_list, flat_list_time = find_all_loops(top_whale_sellers, transactions_df)
             with open('list_of_dodgy_transactions/' + name +
                 '.pkl', 'wb') as f:
                     pickle.dump(flat_list, f)
                     print("Created")
+            with open('list_of_dodgy_transactions/' + name +
+                '.pkl', 'wb') as ft:
+                    pickle.dump(flat_list, ft)
+                    print("Created")
             print(flat_list)
+            print(flat_list_time)
 
 
 # This will rerun all of the loop data - creating a list of transaction hashes of dodgy transactions (loops), 
@@ -181,4 +197,4 @@ def create_loops():
         except:
             print("No data")
             print(name)
-create_loops()
+# create_loops()
