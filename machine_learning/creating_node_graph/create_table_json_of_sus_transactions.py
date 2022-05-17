@@ -96,5 +96,7 @@ def create_loops():
     
     json_table_loops(df_loops)
 
-create_loops()
+
+if __name__ == '__main__':
+    create_loops()
 

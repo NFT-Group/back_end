@@ -111,10 +111,7 @@ def loop_data():
             print(flat_list_time)
 
 
-# This will rerun all of the loop data - creating a list of transaction hashes of dodgy transactions (loops), 
-# where the "to address" in the first transaction after 'start loop' and the 'from address' in the last transaction hash
-# will be the same
-# loop_data()
+
 
 
 #once list of dodgy transactions created, transactions need to be filtered to make sure they all occur within a month 
@@ -197,4 +194,11 @@ def create_loops():
         except:
             print("No data")
             print(name)
-create_loops()
+
+if __name__ == '__main__':
+    # This will rerun all of the loop data - creating a list of transaction hashes of dodgy transactions (loops), 
+    # where the "to address" in the first transaction after 'start loop' and the 'from address' in the last transaction hash
+    # will be the same
+    
+    # loop_data() # PUT IN TO RERUN ALL LOOP DATA
+    create_loops()

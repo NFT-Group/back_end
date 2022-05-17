@@ -105,6 +105,6 @@ def find_wallet_name(name):
     return wallet_name
 
 
-
-node_data()
+if __name__ == '__main__':
+    node_data()
 
