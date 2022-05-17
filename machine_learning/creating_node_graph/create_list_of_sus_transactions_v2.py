@@ -114,7 +114,7 @@ def loop_data():
 # This will rerun all of the loop data - creating a list of transaction hashes of dodgy transactions (loops), 
 # where the "to address" in the first transaction after 'start loop' and the 'from address' in the last transaction hash
 # will be the same
-loop_data()
+# loop_data()
 
 
 #once list of dodgy transactions created, transactions need to be filtered to make sure they all occur within a month 
@@ -193,8 +193,8 @@ def create_loops():
                 '.pkl', 'rb') as f:
                 bored_ape_list = pickle.load(f)
             whale_transactions, intersection = transaction_hashes_to_node_graph(bored_ape_list, transactions_df)
-            create_json_of_node_data(whale_transactions, intersection, 'loop_graph_json/' + name + '_loop_graph.json')
+            # create_json_of_node_data(whale_transactions, intersection, 'loop_graph_json/' + name + '_loop_graph.json')
         except:
             print("No data")
             print(name)
-# create_loops()
+create_loops()
