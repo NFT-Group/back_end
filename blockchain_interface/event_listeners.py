@@ -36,12 +36,14 @@ def convert_list_to_transaction_json(data):
     dfjson = DF.to_json(orient='records')
     parsed = json.loads(dfjson)
 
-    print(parsed)
+    #print(parsed)
     return parsed
 
 def construct_JSON_and_save_event(event, transaction, contract, contract_address):
     input = (transaction["input"])
+    # ensure opensea transaction event
     if input[0:10] == cd.atomicMatch or input[0:10] == cd.buyPunk or transaction["to"] == cd.openSea:
+        # build custom transaction info object
         transaction_hash = (event["transactionHash"]).hex()
         block_hash = (transaction["blockHash"]).hex()
         block = web3.eth.getBlock(block_hash)
@@ -53,14 +55,15 @@ def construct_JSON_and_save_event(event, transaction, contract, contract_address
         tokenURI = None
         tokenID = None
         if (contract_address == cd.cryptoPunkAddress):
+            # special case for cryptopunks
             from_address = event["args"]["from"]
             to_address = event["args"]["to"]
             tokenID = transaction["input"][-5:]
             tokenID = int(tokenID, 16)
             tokenURI = "punks_do_not_have_token_URIs"
         else:
-            from_address = "0x" + transaction["input"][2 + (32 * 5):2 + (32 * 5) + 40] #define in terms of 10 + 64*x blocks
-            to_address = "0x" + transaction["input"][2 + (32 * 3):2 + (32 * 3) + 40] #also this
+            from_address = "0x" + transaction["input"][2 + (32 * 5):2 + (32 * 5) + 40]
+            to_address = "0x" + transaction["input"][2 + (32 * 3):2 + (32 * 3) + 40]
             tokenID_a = transaction["input"][10 + (64 * 58):10 + (64 * 58) + 8]
             tokenID_a = int(tokenID_a, 16)
             tokenID_b = transaction["input"][10 + (64 * 62):10 + (64 * 62) + 8]
@@ -113,6 +116,7 @@ def handle_event(event, contract, previous_hash = [" "]):
     construct_JSON_and_save_event(event, transaction, contract, contract_address)
 
 def log_loop(event_filters, contracts, poll_interval):
+    # listen live
     while True:
         for event_filter, contract in zip(event_filters, contracts):
             for event in event_filter.get_new_entries():
@@ -144,11 +148,11 @@ if __name__ == '__main__':
     
     latest_firebase_block = ref.order_by_child('blocknumber').limit_to_last(1).get()
     latest_firebase_block = latest_firebase_block[list(latest_firebase_block.keys())[0]]['blocknumber']
-    print(latest_firebase_block)
+    #print(latest_firebase_block)
 
     latest_firebase_block += 1
-
     
+    # find latest block from previous scan (b)
     block = web3.eth.get_block('latest')
     latest_block_number = block['number']
 
@@ -170,9 +174,10 @@ if __name__ == '__main__':
     ## find latest ethereum chain block number again (c)
     block = web3.eth.get_block('latest')
     REAL_latest_block_number = block['number']
-    print("REAL latest block")
-    print(REAL_latest_block_number)
+    #print("REAL latest block")
+    #print(REAL_latest_block_number)
     while (latest_block_number != REAL_latest_block_number):
+        # catch up
         temp_block_number = latest_block_number
         latest_block_number = REAL_latest_block_number
 
@@ -190,6 +195,8 @@ if __name__ == '__main__':
         print("REAL_latest_block_number")
         print(REAL_latest_block_number)
 
+        
+        ## overall:
         
         ## scan from a to b for all 8 collections
         
